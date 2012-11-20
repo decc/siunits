@@ -1,0 +1,17 @@
+Package: siunits
+Maintainer: James Geddes <james.geddes@decc.gsi.gov.uk>
+Author: James Geddes <james.geddes@decc.gsi.gov.uk>
+Version: 0.0-1
+License: GPL-3
+Title: SI (and other) units and tools for dealing with physical quantities
+Description: 
+Suggests:
+    testthat,
+    roxygen2
+Collate:
+    'siunits.R'
+    'units.R'
+    'initial-unit-set.R'
+    'dimensions.R'
+    'measures.R'
+    'quantities.R'
