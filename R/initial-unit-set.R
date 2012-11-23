@@ -2,15 +2,15 @@
 ## The SI prefixed versions of the base units
 ## ==========================================
 
-add_unit("M", "g", "gram", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "kg")
-add_unit("L", "m", "metre", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "m")
-add_unit("T", "s", "second", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "s")
-add_unit("I", "A", "ampere", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "A")
-add_unit("Th", "K", "kelvin", is.coherent = TRUE, gen.prefixes = TRUE, true.basis =
+add_unit("mass", "g", "gram", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "kg")
+add_unit("length", "m", "metre", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "m")
+add_unit("time", "s", "second", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "s")
+add_unit("electric_current", "A", "ampere", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "A")
+add_unit("temperature", "K", "kelvin", is.coherent = TRUE, gen.prefixes = TRUE, true.basis =
          "K")
-add_unit("N", "mol", "mole", is.coherent = TRUE, gen.prefixes = TRUE, true.basis =
+add_unit("amount", "mol", "mole", is.coherent = TRUE, gen.prefixes = TRUE, true.basis =
          "mol") 
-add_unit("J", "cd", "candela", is.coherent = TRUE, gen.prefixes = TRUE, true.basis
+add_unit("luminous_intensity", "cd", "candela", is.coherent = TRUE, gen.prefixes = TRUE, true.basis
          = "cd")
 
 
@@ -65,7 +65,7 @@ add_unit("voltage", "V", "volt", is.coherent = TRUE, gen.prefixes = TRUE)
 
 add_unit("time", "h", "hour", multiple = 60 * 60)
 add_unit("mass", "t", "tonne", multiple = 1000, gen.prefixes = TRUE)
-
+add_unit(DIMENSIONLESS, "%", "per cent", "per cent", multiple = 0.01)
 
 ## "Small-c" calorie
 ## -----------------
@@ -78,11 +78,11 @@ add_unit("energy", "cal", "calorie", multiple = 4.1868, gen.prefixes = TRUE)
 ## -----------------------
 ## Definition: OECD/IEA definition, also the one used by DUKES
 add_unit("energy", "toe", "tonne of oil equivalent", "tonnes of oil equivalent",
-         multiple = Quantity(1e10, "cal"), gen.prefixes = TRUE)
+         multiple = as.Quantity(1e10, "cal"), gen.prefixes = TRUE)
 
 ## Therm
 ## -----
 ## Definition: The Units of Measurement Regulations, 1995
 ## http://www.legislation.gov.uk/uksi/1995/1804/schedule/made
-add_unit("energy", "therm", "therm", multiple = Quantity(105.505585257348,
+add_unit("energy", "therm", "therm", multiple = as.Quantity(105.505585257348,
                                        "MJ"), gen.prefixes = TRUE)

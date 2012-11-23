@@ -23,10 +23,11 @@ NULL
 ## * + / -
 ## to_SI : "(N m)_[energy] ktoe^-1" -> "J J^-1" (retains signature)
 ## write unit tests (aha ha)
-## unit.Quantity
+##
+## defaults, so, for example, print(quantity, defaults = TRUE),
+## or print(quantity, defaults = list(area = "wales", energy = "Mtoe"))
 ##
 ## as.Quantity(str)
-## as.Quantity(num) (no unit -> dimensionless)
 ##
-## make units (and dimensions? and atomic units?) classes
-
+## simplify.unit: looks for units to cancel: doesn't change units.
+## simplify.Q : cancels and changes

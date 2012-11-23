@@ -62,7 +62,10 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
                      gen.prefixes = FALSE,
                      true.basis = NA,
                      series = NA) {
-
+  if (!is.dimension(dimension)) {
+    stop(dimension, " is not a known dimension")
+  }
+  
   if (is.Quantity(multiple)) {
     unit <- as.Unit(multiple)
     multiple <- as.numeric(multiple) * si_multiple.unit(unit) 

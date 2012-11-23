@@ -1,33 +1,11 @@
 ## Functions for reading strings
 
-## Read a simple series of powers and return a vector
-## eg, "kg m s^-2" -> c(kg = 1, m = 1, s = -2)
-## eg, "power time" -> c(power = 1, time = 1)
-
-parse_simple_vector <- function(str) {
-  unlist(
-    lapply(strsplit(
-      unlist(strsplit(str, " ", fixed = TRUE)),
-      "^", fixed = TRUE),
-           parse_power))
-}
-
-parse_power <- function(ll) {
-  if (length(ll) == 1L) {
-    power <- 1
-  } else {
-    power <- as.numeric(ll[[2]])
-  }
-  
-  structure(power, names = ll[[1]])
-}
-
 ## Read a complex structure,
 ## eg, (kg m s^-2)_[force]
 ## ( kg m s ^ -2 ) _ [ force ]
 
 ## Regular expression
-NAME <- "[[:alpha:]]+"
+NAME <- "[[:alpha:]%]+"
 SPACE <- "[[:space:]]+"
 NUMBER <- "\\-?[[:digit:]]+"
 OPENSUBUNIT <- "\\("

@@ -19,11 +19,11 @@ is.Unit <- function(u) {
 }
 
 as.Unit <- function(e) {
-  UseMethod("as.Unit", e)
+  UseMethod("as.Unit")
 }
 
 as.Unit.character <- function(e) {
-  check_unit(parse_unit(lexify_unit(e))$tree)
+  structure(check_unit(parse_unit(lexify_unit(e))$tree), class = "Unit")
 }
 
 as.Unit.Unit <- function(e) {
@@ -47,7 +47,7 @@ ensure_unit <- function(u) {
 ## DIMENSIONSs are defined. 
 
 is.unit <- function(u) {
-  (is.null(u)
+  (identical(length(u), 0L)
    || is.single_atomic_unit(u) 
    || is.derived_unit(u)
    || is.unit_to_power(u)
@@ -60,8 +60,8 @@ is.unit <- function(u) {
 check_unit <- function(unit) {
   if (!is.unit(unit)) {
     stop("'unit' is not a well-formed unit (this error is likely due to a bug)")
-  } else if (is.null(unit)) {
-    NULL
+  } else if (identical(length(unit), 0L)) {
+    list()
   } else {
     check_unit0(unit)
   }
@@ -144,11 +144,17 @@ check_unit_to_power <- function(unit) {
 ## Writing units as strings
 ## ------------------------
 
+print.Unit <- function(u, verbose = TRUE) {
+  cat(format(u, verbose), "\n")
+  invisible(u)
+}
+
 format.Unit <- function(u, verbose = FALSE) {
-  if (is.null(u)) {
+  if (identical(length(u), 0L)) {
     ""
+  } else {
+    format_unit0(unclass(u), verbose, parens = FALSE)
   }
-  format_unit0(u, verbose, parens = FALSE)
 }
 
 format_unit0 <- function(u, verbose, parens) {
@@ -200,14 +206,23 @@ format_unit_to_power <- function(u, verbose, parens) {
 ## ------------------
 
 ## The units of u^-1
-inverse_unit <- function(u) {}
-  
-## The units of u^n
-  
+inverse_unit <- function(u) {
+  power_unit(u, -1)
+}
+
+power_unit <- function(u, n) {
+  if (is.single_atomic_unit(u)){
+    structure(make_unit_to_power(u, n), class = "Unit")
+  } else if (is.unit_to_power(u)) {
+    structure(make_unit_to_power(u[[2]], n * u[[3]]), class = "Unit")
+  } else {
+    structure(make_unit_to_power(u, n), class = "Unit")
+  }
+}
+
 ## The units of u1 u2
 product_unit <- function(u1, u2) {
-
-  
+  structure(make_derived_unit(list(u1,u2)), class = "Unit")
 }
 
 
@@ -219,7 +234,9 @@ product_unit <- function(u1, u2) {
 ## Return the 7-element dimension basis vector of this unit
 
 unit_to_basis <- function(u) {
-  if (is.single_atomic_unit(u)) {
+  if (identical(length(u), 0L)) {
+    dimension_to_basis(DIMENSIONLESS)
+  } else if (is.single_atomic_unit(u)) {
     dimension_to_basis(dimension.atomic_unit(u))
   } else if (is.derived_unit(u)) {
     Reduce(`+`, lapply(u[-1], unit_to_basis))
@@ -231,15 +248,15 @@ unit_to_basis <- function(u) {
 }
 
 is.compatible_unit <- function(u1, u2) {
-  identical(ensure_unit(unit_to_basis(u1)),
-            ensure_unit(unit_to_basis(u2)))
+  identical(unit_to_basis(ensure_unit(u1)),
+            unit_to_basis(ensure_unit(u2)))
 }
 
 
 ## What is this unit as a multiple of SI basis units? 
 si_multiple.unit <- function(u) {
   u <- ensure_unit(u)
-  if (is.null(u)) {
+  if (identical(length(u), 0L)) {
     1.0
   } else if (is.single_atomic_unit(u)) {
     si_multiple.atomic_unit(u)

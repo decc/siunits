@@ -17,44 +17,41 @@ is.Quantity <- function(q) {
 ## Quantity: make a numeric object of class Quantity
 ## measure: either a unit, or a string representing a unit
 
-Quantity <- function(vec, unit) {
-  if (is.Quantity(vec)) warn("'vec' is already a Quantity")
-  if (!is.numeric(vec)) stop("'vec' must be numeric")
+as.Quantity <- function(value, unit = "") {
+  UseMethod("as.Quantity")
+}
 
+as.Quantity.Quantity <- function(value, unit) {
+
+  if (nargs() == 1L) return(value)
+  
   unit <- as.Unit(unit)
-  structure(vec, class = c("Quantity", "numeric"), unit = unit)
+  old.unit <- as.Unit(value)
+  if (!is.compatible_unit(unit, old.unit)) {
+    stop("can't convert ", old.unit, " to ", unit)
+  }
+  
+  result <- as.numeric(value) * si_multiple.unit(old.unit) /
+    si_multiple.unit(unit)
+  
+  as.Quantity(result, unit)
+
+}
+
+as.Quantity.numeric <- function(value, unit) {
+  unit <- as.Unit(unit)
+  structure(value, class = c("Quantity", "numeric"), unit = unit)
 }
 
 print.Quantity <- function(q, verbose = FALSE, ...) {
-  cat("Units:", format_unit(as.Unit(q), verbose), "\n")
+  cat("Units:", format(as.Unit(q), verbose), "\n")
   print(c(q), ...)
   invisible(q)
 }
 
-as.Quantity <- function(q, new.unit) {
-  if (!is.Quantity(q)) stop("'q' must be a Quantity")
-  
-  old.unit <- as.Unit(q)
-  
-  if (is.character(new.unit)) {
-    new.unit <- as.Unit(new.unit)
-  } else if (!is.unit(new.unit)) {
-    stop ("'new.unit' must be a unit or a string")
-  }
-  
-  if (!is.compatible_unit(new.unit, old.unit)) {
-    stop("'q' and 'new.unit' must be unit compatible")
-  }
-  
-  result <- as.numeric(q) * si_multiple.unit(old.unit) /
-    si_multiple.unit(new.unit)
-  
-  Quantity(result, new.unit)
-}
-
 as.character.Quantity <- function(q) {
   q <- vapply(q, function(qq) {
-    paste(qq, format_unit(as.Unit(q))) }, character(1))
+    paste(qq, format(as.Unit(q))) }, character(1))
   NextMethod()
 }
 
@@ -65,16 +62,18 @@ as.character.Quantity <- function(q) {
     stop("arguments to '+' must be unit compatible", call. = FALSE) 
   }
   
-  Quantity(as.numeric(e1) + as.numeric(as.Quantity(e2, as.Unit(e1))),
+  as.Quantity(as.numeric(e1) + as.numeric(as.Quantity(e2, as.Unit(e1))),
            as.Unit(e1))
 }
 
 `-.Quantity` <- function(e1, e2) {
+  if (nargs() == 1L) return(as.Quantity(e1))
+  
   if (!is.compatible_unit(as.Unit(e1), as.Unit(e2))) {
     stop("arguments to '-' must be unit compatible", call. = FALSE) 
   }
   
-  Quantity(as.numeric(e1) - as.numeric(as.Quantity(e2, as.Unit(e1))),
+  as.Quantity(as.numeric(e1) - as.numeric(as.Quantity(e2, as.Unit(e1))),
            as.Unit(e1))
 }
 
@@ -87,23 +86,29 @@ as.character.Quantity <- function(q) {
   }
   
   if (!is.Quantity(e1)) {
-    return(Quantity(e1 *  as.numeric(e2), as.Unit(e2)))
+    return(as.Quantity(e1 * as.numeric(e2), as.Unit(e2)))
   } else {
-    return(Quantity(as.numeric(e1) * as.numeric(e2), as.Unit(e1)))
+    return(as.Quantity(as.numeric(e1) * as.numeric(e2), product_unit(e1, e2)))
   }
 }
 
-`/.Quantity` <- function(q1, q2) {
+`/.Quantity` <- function(e1, e2) {
+  if (!is.Quantity(e2)) {
+    return(as.Quantity(as.numeric(e1) / e2, as.Unit(e1)))
+  } else if (!is.Quantity(e1)) {
+    return(as.Quantity(e1 / as.numeric(e2), inverse_unit(as.Unit(e2))))
+  }
+  
   if (!is.compatible_unit(as.Unit(q1), as.Unit(q2))) {
     stop("arguments to '+' must be unit compatible", call. = FALSE) 
   }
 
-  Quantity(as.numeric(q1) + as.numeric(as.Quantity(q2, as.Unit(q1))),
+  as.Quantity(as.numeric(q1) + as.numeric(as.Quantity(q2, as.Unit(q1))),
            as.Unit(q1))
 }
 
 `^.Quantity` <- function(q, e) {
 
-  Quantity(as.numeric(q1) + as.numeric(as.Quantity(q2, as.Unit(q1))),
+  as.Quantity(as.numeric(q1) + as.numeric(as.Quantity(q2, as.Unit(q1))),
            as.Unit(q1))
 }

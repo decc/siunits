@@ -7,8 +7,12 @@ dimension_to_basis <- function(dim) {
 
 ## Reduce a vector of the form (mass = 1, length = 2, ...) to basis dimensions
 dimv_to_basis <- function(dimv) {
-  Reduce(`+`,
-         Map(`*`, dimv, lapply(names(dimv), dimension_to_basis)))
+  if (identical(length(dimv), 0L)) {
+    dimension_to_basis(DIMENSIONLESS)
+  } else {
+    Reduce(`+`,
+           Map(`*`, dimv, lapply(names(dimv), dimension_to_basis)))
+  }
 }
 
 
@@ -37,7 +41,12 @@ Basis.Dimensions <- data.frame(
 
 ## TODO: Need a "Dimensions -> default Unit" map.
 
+DIMENSIONLESS = "ONE"
+
 Dimensions <- list(
+  ONE = list(
+    definition = NULL,
+    vector = c(0,0,0,0,0,0,0)),
   length = list(
     definition = NULL,
     vector = c(1,0,0,0,0,0,0)),
