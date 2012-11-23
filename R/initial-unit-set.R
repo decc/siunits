@@ -15,12 +15,13 @@ add_unit("J", "cd", "candela", is.coherent = TRUE, gen.prefixes = TRUE, true.bas
 
 
 ## Selected dimensions which don't have their own units in SI
-## but for which other unit systems do have names
 ## ==========================================================
 
 add_dimension("velocity", c(length = 1, time = -1)) # m/s
 add_dimension("acceleration", c(velocity = 1, time = -1)) # (m/s)/s
 add_dimension("area", c(length = 2)) # m^2
+add_dimension("momentum", c(mass = 1, velocity = 1)) # kg (m/s)
+
 
 
 ## Dimensions with their own units
@@ -57,12 +58,6 @@ add_unit("electric_charge", "C", "coulomb", is.coherent = TRUE, gen.prefixes =
 
 add_dimension("voltage", c(energy = 1, electric_charge = -1)) # V = J / C.
 add_unit("voltage", "V", "volt", is.coherent = TRUE, gen.prefixes = TRUE)
-
-
-## Selected other dimensions without their own units
-## =================================================
-
-add_dimension("momentum", c(mass = 1, velocity = 1)) # kg (m/s)
 
 
 ## Non-SI energy and time units

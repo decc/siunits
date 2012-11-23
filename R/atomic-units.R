@@ -1,29 +1,6 @@
-### Units - A physical quantity package for SI units (and extensions)
+## Functions for dealing with "atomic units"
 
-## Notes:
-##
-## - Ratio scales only -- no degrees Celsius to Kelvin
-## - Uses SI as the underlying basis
-##
-## Main user functions:
-## Quantity(v, unit_string, dimension_string) : make an object of class Quantity
-## print(q, verbose = FALSE) : print an object q of class Quantity
-## 
-## add_unit
-## add_dimension
-
-## TODO
-##
-## most functions work only with simple measures
-## measures should be recursive
-## perhaps Units should have named rows?
-## functions which take 'measure, dimension = NULL', should just take 'measure' and
-## accept a string representation 
-## write unit tests (aha ha)
-## unit.Quantity
-## dimension.Quantity (?)
-## unit.String --> return details of unit
-
+## indef.article : either "a" or "an" depending on the first letter of the word.
 indef.article <- function(str) {
   if (substr(str, 1, 1) %in% c("a", "A", "e", "E", "i", "I", "o", "O", "u",
                                "U")) {
@@ -31,81 +8,96 @@ indef.article <- function(str) {
   } else {
     "a" }
 }
-    
+
+## Types
+## -----
+
+## <unit_vector> ::= vector-of (atomic_unit = power) such that no atomic_unit
+## occurs twice and no power is zero
+
+is.unit_vector <- function(uv) {
+  (is.numeric(uv)
+   && all(is.atomic_unit(names(uv))) 
+   && !anyDuplicated(names(uv))
+   && !any(uv == 0))
+}
+
+check_unit_vector <- function(uv) {
+
+  if (is.unit_vector(uv)) {
+    return(uv)
+  } else {
+    not.matched <- !is.atomic_unit(names(uv))
+    if (any(not.matched)) {
+      stop(names(uv)[not.matched], " is not a known atomic unit")
+    } else if (any(uv == 0)) {
+      stop("powers of 0 are not allowed in a unit vector")
+    } else if (anyDuplicated(names(uv))) {
+      stop("duplicate elements are not allowed in a unit vector")
+    } else {
+      stop("something is not a unit vector (but I don't know why not)")
+    }
+  }
+}
+
 ## atomic_unit := one of a list of named units (kg, J, N, Gt, mHz, ...)
-
-is.basis_unit <- function(au) {
-  au %in% Units$symbol[Units$type == "basis"]
-}
-
-is.coherent_unit <- function(au) {
-  au %in% Units$symbol[Units$type == "coherent"] | is.basis_unit(au)
-}
-
+##
 is.atomic_unit <- function(au) {
   au %in% Units$symbol
 }
 
-atomic_unit.type <- function(au) {
-  Units$type[Units$symbol == au]
+is.coherent_atomic_unit <- function(au) {
+  (atomic_unit.type(au) == "coherent") | is.basis_atomic_unit(au)
 }
 
-## unit := vector-of (atomic_unit = power) such that no atomic_unit occurs twice and no
-## power is zero
-
-is.unit <- function(u) {
-  (is.numeric(u)
-   && all(is.atomic_unit(names(u))) 
-   && !anyDuplicated(names(u))
-   && !any(u == 0))
+is.basis_atomic_unit <- function(au) {
+  (atomic_unit.type(au) == "basis")
 }
 
-## unit.dimension : unit -> dimension
-## Extract the dimension of a unit
-
-unit.dimension <- function(symb) {
-  Units$dimension[match(symb, Units$symbol)]
-}
-
-
-
-## as.unit: string -> unit (eg, "kg m^2 s^-2") 
-as.unit <- function(str) {
-  unlist(
-    lapply(strsplit(
-      unlist(strsplit(str, " ", fixed = TRUE)),
-      "^", fixed = TRUE),
-           make_unit_part))
-}
-
-## make_unit_part: list(unit, power) -> c(unit = power)
-make_unit_part <- function(ll) {
-  if (length(ll) == 1L) {
-    power <- 1
-  } else {
-    power <- as.numeric(ll[[2]])
-  }
-
-  if (!is.atomic_unit(ll[[1]])) stop (ll[[1]], " is not a known unit")
-  if (identical(power, 0L)) stop ("powers of 0 are not allowed in unit definitions")
+## is.compatible_unit_vector : check whether a unit vector is compatible with a dimension
+is.compatible_unit_vector <- function(uv, dimension) {
+  uv.dimensions <- uv
+  names(uv.dimensions) <- atomic_unit.dimension(names(uv))
   
-  names(power) <- ll[[1]]
-  power
+  identical(to_basis_dimensions(uv.dimensions),
+            Dimensions[[dimension]]$vector)
+}
+
+## Accessors
+## ---------
+
+## Type of atomic unit
+##
+atomic_unit.type <- function(au) {
+  Units$type[match(au, Units$symbol)]
+}
+
+## atomic_unit.dimension : atomic unit -> dimension
+## Extract the dimension of an atomic unit
+##
+atomic_unit.dimension <- function(au) {
+  Units$dimension[match(au, Units$symbol)]
 }
 
 
-## TODO: Need to capture the numeric-relevant options to 'print'
 
+## Reading and writing strings
+## ---------------------------
 
+## as.unit_vector: string -> unit_vector (eg, "kg m^2 s^-2") 
+##
+as.unit_vector<- function(str) {
+  check_unit_vector(parse_simple_vector(str))
+}
 
-## format_unit: unit -> "kg m^2 s^-2" (eg)
-format_unit <- function(unit) {
+## format_unit_vector: unit -> "kg m^2 s^-2" (eg)
+format_unit_vector <- function(uv) {
   paste(
-    mapply(format_unit_part, names(unit), unit), collapse = " ")
+    mapply(format_unit_vector_part, names(uv), uv), collapse = " ")
 }
 
-## format_unit_part: -> m^2 (eg)
-format_unit_part <- function(symbol, power) {
+## format_unit_vector_part: -> m^2 (eg)
+format_unit_vector_part <- function(symbol, power) {
   if (power == 1) {
     symbol
   } else {
@@ -113,38 +105,18 @@ format_unit_part <- function(symbol, power) {
   }
 }
 
-## to_SI: Quantity -> Quantity expressed in SI units, using the SI unit for each
-## corresponding dimension, where possible
+## Conversions
 
 ## unit.si_multiple: unit -> number: the multiple these units are of SI basis units 
-unit.si_multiple <- function(unit) {
+unit_vector.si_multiple <- function(uv) {
   Reduce(`*`,
          mapply(function(au, power) {
            Units$multiple[Units$symbol == au]^power
-         }, names(unit), unit))
+         }, names(uv), uv))
 }  
 
 
-
-
-
-add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, series) {
-
-  if (any(is.atomic_unit(symbol))) {
-    type <- atomic_unit.type(symbol)
-    article <- indef.article(type) 
-    stop("unit '", symbol, "' is already defined (as", article, atomic_unit.type(symbol), "unit)")
-  }
-  
-  Units <<- rbind(Units,
-                  data.frame(symbol = symbol,
-                             dimension = dimension,
-                             name = name,
-                             plural.name = plural.name,
-                             type = type,
-                             multiple = multiple,
-                             series = series))
-}
+## Making new units
 
 ## Add units, including making up all the prefixed versions, calling add_unit0
 ## for each individual unit (and to check for duplicates).
@@ -162,7 +134,7 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
     if (!is.simple_measure(measure)) {
       stop("'multiple' must be a simple measure or numeric")
     }
-    multiple <- as.numeric(multiple) * unit.si_multiple(measure[[1]][[1]][[1]]) 
+    multiple <- as.numeric(multiple) * unit_vector.si_multiple(measure[[1]][[1]][[1]]) 
   }
   
   if (plural.name == "") {
@@ -205,6 +177,26 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
   }
 }
 
+
+## Add a single unit
+
+add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, series) {
+
+  if (any(is.atomic_unit(symbol))) {
+    type <- atomic_unit.type(symbol)
+    article <- indef.article(type) 
+    stop("unit '", symbol, "' is already defined (as", article, atomic_unit.type(symbol), "unit)")
+  }
+  
+  Units <<- rbind(Units,
+                  data.frame(symbol = symbol,
+                             dimension = dimension,
+                             name = name,
+                             plural.name = plural.name,
+                             type = type,
+                             multiple = multiple,
+                             series = series))
+}
 
 
 ## Units in basis.units are the default for those dimensions whose

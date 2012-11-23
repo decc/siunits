@@ -1,3 +1,4 @@
-import(dimensions.R)
-import(measures.R)
-import(units.R)
+export(Quantity)
+export(add_dimension)
+export(as.Quantity)
+export(print.Quantity)

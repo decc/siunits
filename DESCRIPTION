@@ -10,8 +10,9 @@ Suggests:
     roxygen2
 Collate:
     'siunits.R'
+    'parse.R'
     'dimensions.R'
     'atomic-units.R'
-    'initial-unit-set.R'
     'units.R'
     'quantities.R'
+    'initial-unit-set.R'

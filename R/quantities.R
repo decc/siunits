@@ -1,4 +1,4 @@
-#' @import units.R dimensions.R measures.R
+#' @export as.Quantity Quantity print.Quantity
 
 as.Quantity <- function(q, measure) {
   if (!inherits(q, "Quantity")) stop("'q' must be a Quantity")
@@ -17,8 +17,8 @@ as.Quantity <- function(q, measure) {
     stop("'q' and 'measure' must be unit compatible")
   }
 
-  result <- q * unit.si_multiple(old.measure[[1]][[1]][[1]]) /
-    unit.si_multiple(new.measure[[1]][[1]][[1]])
+  result <- q * unit_vector.si_multiple(old.measure[[1]][[1]][[1]]) /
+    unit_vector.si_multiple(new.measure[[1]][[1]][[1]])
 
   attr(result, "measure") <- new.measure
   result

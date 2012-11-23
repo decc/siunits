@@ -1,31 +1,16 @@
-#' @import units.R
+#' @export add_dimension
 
-## A unit is a compatible unit for a dimension just in case the reduction of
-## the dimensions of the unit to basis dimensions is the same as the reduction
-## of the dimensions of the, er  ... dimension.
+## Reduce a dimension vector to basis dimensions 
+## dv : a dimension vector (a generic vector is allowed)
 
-to_basis <- function(dim_expr) {
+to_basis_dimensions <- function(dv) {
   Reduce(`+`,                                           # Add up ...
          Map(`*`,                                       # the powers of ..
-             dim_expr,                            
-             lapply(Dimensions[names(dim_expr)],        # the basis dimensions
+             dv,                            
+             lapply(Dimensions[names(dv)],        # the basis dimensions
                     function(x) {`[[`(x, "vector")} ))) # (extracting the vectors).   
 }
 
-## unit: vector-of (atomic_unit, power)
-is.compatible_unit <- function(unit, dimension) {
-  unit.dimensions <- unit
-  names(unit.dimensions) <- Units$dimension[match(names(unit), Units$symbol)]
-  
-  identical(to_basis(unit.dimensions),
-            Dimensions[[dimension]]$vector)
-}
-
-## 
-## atomic_measure := pair (unit, dimension) such that unit is a compatible unit for dimension
-## 
-## measure := list-of (atomic_measure, power) such that no power is zero
-##                
 
 is.dimension <- function(dimension) {
   !is.null(Dimensions[[dimension]])
@@ -36,7 +21,7 @@ add_dimension <- function(name, definition) {
     stop("dimension [", name, "] already defined")
   }
   Dimensions[[name]] <<- list(definition = definition,
-                              vector = to_basis(definition))
+                              vector = to_basis_dimensions(definition))
 }
 
 ## Definitions of dimensions

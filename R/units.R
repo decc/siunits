@@ -1,13 +1,116 @@
-## <measure> ::= <atomic unit>
-##             | pair (<dimension>, <measure>) where dimension is compatible
-##                                             with measure
-##             | list-of (<measure>, power)
-## 
+## <unit> ::= <single atomic unit>
+##          | <derived unit>
+##          | <dimensioned unit>
+##
+## <single atomic unit> ::= <atomic unit> of length 1
+##
+## <derived unit> ::= <unit with power> *
+##
+## <dimensioned unit> ::= (<dimension>, <unit>)
+## where the basis form of dimension is the same as the basis form of the
+## dimension of unit
+
+## The dimension of a <unit> is:
+## <atomic unit> : the dimension of the <atomic unit>
+## list-of (<unit>, power) : the derived dimension
+## pair (<unit>, <dimension>) : <dimension>
+##
+## Examples: 
+## "kg"
+## (("kg", 2))
+## (("m", 2), ("s", -1))
+## ( ((("kg", 2)), 3)) , ...)
+## ("mass", "kg")
+## ( "velocity", (("m", 1), ("s", -1)))
+##
+## <atomic unit> : string
+## pair (<dimension>, <unit>) : list of length 2 with character as first element
+## list-of pair (<unit>, power) : list of pairs
+
+is.unit <- function(u) {
+  (
+    (is.single_atomic_unit(u)
+     || is.dimensioned_unit(u) 
+     || is.derived_unit(u)))
+}
+
+is.single_atomic_unit <- function(u) {
+  (identical(length(u), 1L) && is.character(u) && is.atomic_unit(u))
+}
+
+## Is u of the form list(<dimension>, <unit>)
+is.dimensioned_unit <- function(u) {
+  (is.list(u)
+   && identical(length(u), 2L) 
+   && is.character(u[[1]])
+   && identical(length(u[[1]]), 1L)
+   && is.dimension(u[[1]])
+   && is.unit(u[[2]])) ## NEED TO CHECK COMPATIBILITY
+}
+
+## Is u of the form list( list(<unit>, power), ... )
+is.derived_unit<- function(u) {
+  (is.list(u)
+   && all(vapply(u, is.unit_to_power, logical(1))))
+}
+
+## Is u of the form list(<unit>, power)
+is.unit_to_power <- function(u) {
+  (is.list(u)
+   && identical(length(u), 2L)
+   && is.unit(u[[1]])
+   && is.numeric(u[[2]])
+   && identical(length(u[[2]]), 1L)
+   && !identical(u[[2]], 0))
+}
+
+## Writing units as strings
+
+format_unit <- function(u, verbose = TRUE) {
+  format_unit0(u, verbose, parens = FALSE)
+}
+
+format_unit0 <- function(u, verbose, parens) {
+  if (is.single_atomic_unit(u)) {
+    u
+  } else if (is.derived_unit(u)) {
+    format_derived_unit(u, verbose, parens)
+  } else if (is.dimensioned_unit(u)) {
+    if (verbose) {
+      paste(format_unit0(u[[2]], verbose, parens = TRUE), "_[", u[[1]], "]", sep = "")
+    } else {
+      format_unit0(u[[2]], verbose, parens = TRUE)
+    }
+  }
+}
+
+format_derived_unit <- function(u, verbose, parens) {
+  str <- paste(vapply(u, format_unit_to_power, character(1), verbose = verbose,
+                      parens = parens), collapse = " ")
+  if (parens && (length(u) > 1)) {
+    paste("(", str, ")", sep = "")
+  } else {
+    str
+  }
+}
+
+format_unit_to_power <- function(u, verbose, parens) {
+  if (identical(u[[2]], 1)) {
+    format_unit0(u[[1]], verbose, parens = TRUE)
+  } else {
+    paste(format_unit0(u[[1]], verbose, parens = TRUE), "^", u[[2]], sep = "")
+  }
+}
+
+
+
+
+##
 
 is.atomic_measure <- function(am) {
-  (is.unit(am[[1]]) 
+  (is.unit_vector(am[[1]]) 
    && is.dimension(am[[2]])
-   && is.compatible_unit(am[[1]], am[[2]]))
+   && is.compatible_unit_vector(am[[1]], am[[2]]))
 }
 
 is.measure <- function(m) {
@@ -54,7 +157,7 @@ basis_vector <- function(m) {
   ## assumes measure is a simple measure
   dim_expr <- as.numeric(m[[1]][[1]][[1]])
   names(dim_expr) <- unit.dimension(names(m[[1]][[1]][[1]]))
-  to_basis(dim_expr)
+  to_basis_dimensions(dim_expr)
 }
 
 is.compatible.measure <- function(m1, m2) {
@@ -67,12 +170,12 @@ is.compatible.measure <- function(m1, m2) {
 ## TODO: Allow, eg, "kg_[mass]"
 
 as.measure <- function(str, dimension = NULL) {
-  unit <- as.unit(str)
+  unit <- as.unit_vector(str)
   measure <- if (!is.null(dimension)) {
     if (!is.dimension(dimension)) {
       stop("'", dimension, "' is not a known dimension")
     }
-    if (!is.compatible_unit(unit, dimension)) {
+    if (!is.compatible_unit_vector(unit, dimension)) {
       stop ("the dimensions of ", unit, " are not ", dimension)
     }
     list(list(list(unit, dimension), 1))
@@ -87,7 +190,7 @@ as.measure <- function(str, dimension = NULL) {
 unpack.unit <- function(unit) {
   mapply(function(au, power) {
     list(
-      list({v <- c(1); names(v) <- au; v}, unit.dimension(au)),
+      list({v <- c(1); names(v) <- au; v}, atomic_unit.dimension(au)),
       power)},
          names(unit),
          unit,
@@ -120,7 +223,7 @@ format_measure_part <- function(mp, verbose, parens = FALSE) {
   
   
 format_atomic_measure <- function(am, verbose) {
-  ff <- format_unit(am[[1]])
+  ff <- format_unit_vector(am[[1]])
   if (!verbose) {
     ff 
   } else {
