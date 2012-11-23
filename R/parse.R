@@ -64,36 +64,11 @@ is.empty <- function(toks) {
   identical(length(toks), 0L)
 }
 
-## Higher-order functions for building parsers
-
-Succeed <- function(v) {
-  function(toks) { list(list(v, toks)) }
-}
-
-Fail <- function() {
-  function(toks) { list() }
-}
-
-Satisfy <- function(predicate) {
-  function(toks) {
-    if (is.empty(toks)) {
-      (Fail())(list())
-    } else if (predicate(toks[[1]])) {
-      (Succeed(toks[[1]]))(toks[-1])
-    } else {
-      (Fail())(toks[-1])
-    }
-  }
-}
-
-
 parse_error <- function(msg, toks) {
   stop(msg, " with '", toks, "' left")
 }
 
-done <- function(toks) {
-  identical(length(toks), 0L)
-}
+## Higher-order functions for building parsers
 
 Literal <- function(str) {
   function(toks) {
