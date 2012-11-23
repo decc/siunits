@@ -37,17 +37,18 @@ CLOSEDIM <- "\\]"
 TOTHE <- "\\^"
 OFDIM <- "\\_"
 
-TOKENS <- paste(NAME, SPACE, NUMBER, POWER, OPENSUBUNIT, CLOSESUBUNIT, OPENDIM,
-                CLOSEDIM, POWER, DIM, sep = "|")
+TOKENS <- paste(NAME, SPACE, NUMBER, OPENSUBUNIT, CLOSESUBUNIT, OPENDIM,
+                CLOSEDIM, TOTHE, OFDIM, sep = "|")
 
 ## BNF for input --
 ##
 ## <unit> ::= <complete unit> [ SPACE <complete unit> ]* 
 ##          
+## <complete unit> ::= <dimensioned unit> "^" NUMBER
+##                   | <dimensioned unit>
 ##
-## <complete unit> ::= <subunit> "^" NUMBER
-##                   | <subunit> "_" <dimension>
-##                   | <subunit>
+## <dimensioned unit> ::= <subunit> "_" <dimension>
+##                      | <subunit>
 ##
 ## <subunit> ::= NAME
 ##             | "(" <unit> ")"
@@ -56,16 +57,12 @@ TOKENS <- paste(NAME, SPACE, NUMBER, POWER, OPENSUBUNIT, CLOSESUBUNIT, OPENDIM,
 ##
 ## NAME, NUMBER, SPACE, and "things in quotes" are terminals 
 
-as.unit <- function(str) {
-  parse_unit(lexify_unit(str))
-}
-
 is.empty <- function(toks) {
   identical(length(toks), 0L)
 }
 
 parse_error <- function(msg, toks) {
-  stop(msg, " with '", toks, "' left")
+  stop(msg, " with '", toks, "' left", .call = FALSE)
 }
 
 ## Higher-order functions for building parsers
@@ -111,6 +108,27 @@ parse_CLOSEDIM <- Literal("CLOSEDIM")
 parse_NUMBER <- Value("NUMBER")
 parse_NAME <- Value("NAME")
 
+## Constructors for parts of units
+
+make_atomic_unit <- function(unit) {
+  unit
+}
+
+make_derived_unit <- function(list_of_units) {
+  c(quote(`*`), list_of_units)
+}
+
+make_dimensioned_unit <- function(unit, dimension) {
+  list(quote(`_`), unit, dimension)
+}
+
+make_unit_to_power <- function(unit, num) {
+  list(quote(`^`), unit, num)
+}
+  
+
+## Parser
+
 parse_unit <- function(toks) {
   if (is.empty(toks)) {
     return(list())
@@ -120,21 +138,21 @@ parse_unit <- function(toks) {
   if (is.empty(first)) {
     return(list())
   }
-    
+  
   mult <- parse_SPACE(first$toks)
   if (is.empty(mult)) {
     return(first)
   }
-
+  
   second <- parse_unit(mult$toks)
   if (is.empty(second)) {
     parse_error("expecting <unit>", mult$toks)
   } else {
     if (second$tree[[1]] == quote(`*`)) {
-      return(list(tree = c(quote(`*`), first$tree, second$tree[-1]),
+      return(list(tree = make_derived_unit(c(first$tree, second$tree[-1])),
                   toks = second$toks))
     } else {
-      return(list(tree = list(quote(`*`), first$tree, second$tree),
+      return(list(tree = make_derived_unit(list(first$tree, second$tree)),
                   toks = second$toks))
     }
   }
@@ -145,28 +163,41 @@ parse_complete_unit <- function(toks) {
   if (is.empty(toks)) {
     return(list())
   }
-
-  subunit <- parse_subunit(toks)
-  if (is.empty(subunit)) {
+  
+  dimunit <- parse_dimensioned_unit(toks)
+  if (is.empty(dimunit)) {
     return(list())
   }
 
-  tothe <- parse_TOTHE(subunit$toks)
+  tothe <- parse_TOTHE(dimunit$toks)
   if (!is.empty(tothe)) {
     number <- parse_NUMBER(tothe$toks)
     if (!is.empty(number)) {
-      return(list(tree = list(quote(`^`), subunit$tree, number$tree),
+      return(list(tree = make_unit_to_power(dimunit$tree, number$tree),
                   toks = number$toks))
     } else {
       parse_error("expecting NUMBER", tothe$toks)
     }
   }
 
+  return(dimunit)
+}
+
+parse_dimensioned_unit <- function(toks) {
+  if (is.empty(toks)) {
+    return(list())
+  }
+
+  subunit <- parse_subunit(toks)
+  if (is.empty(subunit)) {
+    return(list())
+  }
+  
   ofdim <- parse_OFDIM(subunit$toks)
   if (!is.empty(ofdim)) {
     dimension <- parse_DIMENSION(ofdim$toks)
     if (!is.empty(dimension)) {
-      return(list(tree = list(quote(`_`), subunit$tree, dimension$tree),
+      return(list(tree = make_dimensioned_unit(subunit$tree, dimension$tree),
                   toks = dimension$toks))
     } else {
       parse_error("expecting <dimension>", ofdim$toks)
@@ -188,7 +219,7 @@ parse_DIMENSION <- function(toks) {
 
   dimension <- parse_NAME(opendim$toks)
   if (is.empty(dimension)) {
-    parse_error("expecting a dimension NAME", opendim$toks)
+    parse_error("expecting a dimension", opendim$toks)
   }
 
   closedim <- parse_CLOSEDIM(dimension$toks)
@@ -226,7 +257,8 @@ parse_subunit <- function(toks) {
     parse_error("expecting ')'", dimension$toks)
   }
 
-  return(list(tree = unit$tree, toks = closesubunit$toks))
+  return(list(tree = make_derived_unit(list(unit$tree)),
+              toks = closesubunit$toks))
 }
   
   
@@ -254,9 +286,9 @@ lexify_token <- function(str) {
     list("OPENDIM")
   } else if (grepl(CLOSEDIM, str)) {
     list("CLOSEDIM")
-  } else if (grepl(POWER, str)) {
+  } else if (grepl(TOTHE, str)) {
     list("TOTHE")
-  } else if (grepl(DIM, str)) {
+  } else if (grepl(OFDIM, str)) {
     list("OFDIM")
   }
 }

@@ -9,36 +9,6 @@ indef.article <- function(str) {
     "a" }
 }
 
-## Types
-## -----
-
-## <unit_vector> ::= vector-of (atomic_unit = power) such that no atomic_unit
-## occurs twice and no power is zero
-
-is.unit_vector <- function(uv) {
-  (is.numeric(uv)
-   && all(is.atomic_unit(names(uv))) 
-   && !anyDuplicated(names(uv))
-   && !any(uv == 0))
-}
-
-check_unit_vector <- function(uv) {
-
-  if (is.unit_vector(uv)) {
-    return(uv)
-  } else {
-    not.matched <- !is.atomic_unit(names(uv))
-    if (any(not.matched)) {
-      stop(names(uv)[not.matched], " is not a known atomic unit")
-    } else if (any(uv == 0)) {
-      stop("powers of 0 are not allowed in a unit vector")
-    } else if (anyDuplicated(names(uv))) {
-      stop("duplicate elements are not allowed in a unit vector")
-    } else {
-      stop("something is not a unit vector (but I don't know why not)")
-    }
-  }
-}
 
 ## atomic_unit := one of a list of named units (kg, J, N, Gt, mHz, ...)
 ##
@@ -47,72 +17,36 @@ is.atomic_unit <- function(au) {
 }
 
 is.coherent_atomic_unit <- function(au) {
-  (atomic_unit.type(au) == "coherent") | is.basis_atomic_unit(au)
+  (type.atomic_unit(au) == "coherent") | is.basis_atomic_unit(au)
 }
 
 is.basis_atomic_unit <- function(au) {
-  (atomic_unit.type(au) == "basis")
+  (type.atomic_unit(au) == "basis")
 }
 
-## is.compatible_unit_vector : check whether a unit vector is compatible with a dimension
-is.compatible_unit_vector <- function(uv, dimension) {
-  uv.dimensions <- uv
-  names(uv.dimensions) <- atomic_unit.dimension(names(uv))
-  
-  identical(to_basis_dimensions(uv.dimensions),
-            Dimensions[[dimension]]$vector)
-}
 
 ## Accessors
 ## ---------
 
 ## Type of atomic unit
 ##
-atomic_unit.type <- function(au) {
+type.atomic_unit <- function(au) {
   Units$type[match(au, Units$symbol)]
 }
 
 ## atomic_unit.dimension : atomic unit -> dimension
 ## Extract the dimension of an atomic unit
 ##
-atomic_unit.dimension <- function(au) {
+dimension.atomic_unit <- function(au) {
   Units$dimension[match(au, Units$symbol)]
 }
 
 
-
-## Reading and writing strings
-## ---------------------------
-
-## as.unit_vector: string -> unit_vector (eg, "kg m^2 s^-2") 
-##
-as.unit_vector<- function(str) {
-  check_unit_vector(parse_simple_vector(str))
-}
-
-## format_unit_vector: unit -> "kg m^2 s^-2" (eg)
-format_unit_vector <- function(uv) {
-  paste(
-    mapply(format_unit_vector_part, names(uv), uv), collapse = " ")
-}
-
-## format_unit_vector_part: -> m^2 (eg)
-format_unit_vector_part <- function(symbol, power) {
-  if (power == 1) {
-    symbol
-  } else {
-    paste(symbol, "^", power, sep = "")
-  }
-}
-
 ## Conversions
 
-## unit.si_multiple: unit -> number: the multiple these units are of SI basis units 
-unit_vector.si_multiple <- function(uv) {
-  Reduce(`*`,
-         mapply(function(au, power) {
-           Units$multiple[Units$symbol == au]^power
-         }, names(uv), uv))
+## si_multiple.atomic_unit: unit -> number: the multiple these units are of SI basis units 
+si_multiple.atomic_unit <- function(au) {
+  Units$multiple[match(au, Units$symbol)]
 }  
 
 
@@ -129,18 +63,15 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
                      true.basis = NA,
                      series = NA) {
 
-  if (inherits(multiple, "Quantity")) {
-    measure <- attr(multiple, "measure")
-    if (!is.simple_measure(measure)) {
-      stop("'multiple' must be a simple measure or numeric")
-    }
-    multiple <- as.numeric(multiple) * unit_vector.si_multiple(measure[[1]][[1]][[1]]) 
+  if (is.Quantity(multiple)) {
+    unit <- as.Unit(multiple)
+    multiple <- as.numeric(multiple) * si_multiple.unit(unit) 
   }
   
   if (plural.name == "") {
     plural.name <- paste(name, "s", sep = "")
   }
-    
+  
   type <- if (is.coherent) "coherent" else "other"
   
   if (!gen.prefixes) {
@@ -183,9 +114,9 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
 add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, series) {
 
   if (any(is.atomic_unit(symbol))) {
-    type <- atomic_unit.type(symbol)
+    type <- type.atomic_unit(symbol)
     article <- indef.article(type) 
-    stop("unit '", symbol, "' is already defined (as", article, atomic_unit.type(symbol), "unit)")
+    stop("unit '", symbol, "' is already defined (as", article, type.atomic_unit(symbol), "unit)")
   }
   
   Units <<- rbind(Units,

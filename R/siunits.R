@@ -18,12 +18,15 @@ NULL
 
 ## TODO
 ##
-## most functions work only with simple measures
-## measures should be recursive
-## perhaps Units should have named rows?
-## functions which take 'measure, dimension = NULL', should just take 'measure' and
-## accept a string representation 
+## is.similar_unit(u1, u2) to check, eg, if looks like [power] [time], that is,
+## has the same "dimensional signature"
+## * + / -
+## to_SI : "(N m)_[energy] ktoe^-1" -> "J J^-1" (retains signature)
 ## write unit tests (aha ha)
 ## unit.Quantity
-## dimension.Quantity (?)
-## unit.String --> return details of unit
+##
+## as.Quantity(str)
+## as.Quantity(num) (no unit -> dimensionless)
+##
+## make units (and dimensions? and atomic units?) classes
+

@@ -1,14 +1,14 @@
-#' @export add_dimension
+## Dimensions
 
-## Reduce a dimension vector to basis dimensions 
-## dv : a dimension vector (a generic vector is allowed)
 
-to_basis_dimensions <- function(dv) {
-  Reduce(`+`,                                           # Add up ...
-         Map(`*`,                                       # the powers of ..
-             dv,                            
-             lapply(Dimensions[names(dv)],        # the basis dimensions
-                    function(x) {`[[`(x, "vector")} ))) # (extracting the vectors).   
+dimension_to_basis <- function(dim) {
+  Dimensions[[dim]]$vector
+}
+
+## Reduce a vector of the form (mass = 1, length = 2, ...) to basis dimensions
+dimv_to_basis <- function(dimv) {
+  Reduce(`+`,
+         Map(`*`, dimv, lapply(names(dimv), dimension_to_basis)))
 }
 
 
@@ -21,7 +21,7 @@ add_dimension <- function(name, definition) {
     stop("dimension [", name, "] already defined")
   }
   Dimensions[[name]] <<- list(definition = definition,
-                              vector = to_basis_dimensions(definition))
+                              vector = dimv_to_basis(definition))
 }
 
 ## Definitions of dimensions

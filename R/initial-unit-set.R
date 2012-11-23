@@ -60,10 +60,12 @@ add_dimension("voltage", c(energy = 1, electric_charge = -1)) # V = J / C.
 add_unit("voltage", "V", "volt", is.coherent = TRUE, gen.prefixes = TRUE)
 
 
-## Non-SI energy and time units
+## Non-SI units
 ## ============================
 
 add_unit("time", "h", "hour", multiple = 60 * 60)
+add_unit("mass", "t", "tonne", multiple = 1000, gen.prefixes = TRUE)
+
 
 ## "Small-c" calorie
 ## -----------------
