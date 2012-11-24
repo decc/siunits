@@ -1,6 +1,5 @@
 ## Dimensions
 
-
 dimension_to_basis <- function(dim) {
   Dimensions[[dim]]$vector
 }

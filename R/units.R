@@ -225,7 +225,15 @@ product_unit <- function(u1, u2) {
   structure(make_derived_unit(list(u1,u2)), class = "Unit")
 }
 
+## Simplification of quantities (so we're allowed to change units).
+## Look for units at the same level of the dimension. If there are any,
+## convert to the first set of units, or whatever is in conv, and combine. Don't
+## attempt to reduce derived units.
 
+simplify.unit <- function(u) {
+  if (is.single_atomic_unit(u)) {
+  }
+}
 
 
 ## Functions for extracting information from units
@@ -255,7 +263,6 @@ is.compatible_unit <- function(u1, u2) {
 
 ## What is this unit as a multiple of SI basis units? 
 si_multiple.unit <- function(u) {
-  u <- ensure_unit(u)
   if (identical(length(u), 0L)) {
     1.0
   } else if (is.single_atomic_unit(u)) {

@@ -88,7 +88,7 @@ as.character.Quantity <- function(q) {
   if (!is.Quantity(e1)) {
     return(as.Quantity(e1 * as.numeric(e2), as.Unit(e2)))
   } else {
-    return(as.Quantity(as.numeric(e1) * as.numeric(e2), product_unit(e1, e2)))
+    return(as.Quantity(as.numeric(e1) * as.numeric(e2), product_unit(as.Unit(e1), as.Unit(e2))))
   }
 }
 
@@ -107,8 +107,7 @@ as.character.Quantity <- function(q) {
            as.Unit(q1))
 }
 
-`^.Quantity` <- function(q, e) {
+`^.Quantity` <- function(q, num) {
 
-  as.Quantity(as.numeric(q1) + as.numeric(as.Quantity(q2, as.Unit(q1))),
-           as.Unit(q1))
+  as.Quantity(as.numeric(q)^num, power_unit(as.Unit(q), num))
 }

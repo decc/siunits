@@ -5,25 +5,13 @@ Most physical quantities carry units. This package defines a new class, "quantit
 
 Presently undocument and little commented.
 
-Getting started
----------------
 
-
-```r
-library(devtools)
-load_all(reset = TRUE)
-```
-
-```
-## Loading siunits
-```
 
 
 Examples
 --------
 
-Defining simple quantities:
-
+### Defining simple quantities
 
 ```r
 m1 <- as.Quantity(1, "kg")
@@ -46,7 +34,7 @@ m1 + m2
 ```
 
 
-Conversion of units
+### Conversion of units
 
 ```r
 as.Quantity(m1, "g")
@@ -68,7 +56,7 @@ as.Quantity(e1, "ktoe")
 ```
 
 
-Extensibility
+### Extensibility
 
 ```r
 ## The unit 'tonnes of coal equivalent' is not defined.
@@ -81,7 +69,7 @@ as.Quantity(e1, "tce")
 
 ```r
 
-add_unit("energy", "tce", "tonne of coal equivalent", "tonnes of coal\nequivalent", 
+add_unit("energy", "tce", "tonne of coal equivalent", "tonnes of coal equivalent", 
     multiple = as.Quantity(7, "Gcal"), gen.prefixes = TRUE)
 as.Quantity(e1, "tce")
 ```
@@ -90,4 +78,37 @@ as.Quantity(e1, "tce")
 ## Units: tce 
 ## [1] 1228
 ```
+
+
+### More complex constructions
+
+```r
+gas.CO2 <- as.Quantity(0.185, "kg (kW h)_[energy]^-1")
+as.Quantity(gas.CO2, "kg therm^-1")
+```
+
+```
+## Units: kg therm^-1 
+## [1] 5.422
+```
+
+```r
+gas <- as.Quantity(1, "ktoe")
+gas * gas.CO2
+```
+
+```
+## Units: ktoe (kg (kW h)^-1) 
+## [1] 0.185
+```
+
+```r
+as.Quantity(gas * gas.CO2, "kt")
+```
+
+```
+## Units: kt 
+## [1] 2.152
+```
+
 

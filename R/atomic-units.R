@@ -93,10 +93,10 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
       prefix.range <- 1:length(SI.Prefixes$prefix)
       skip.multiple <- 1
     } else {
-      add_unit0(dimension, symbol, name, plural.name, "other", multiple, series)
       skip <- match(true.basis, paste(SI.Prefixes$prefix, symbol, sep = ""))
       prefix.range <- (1:length(SI.Prefixes$prefix))[-skip]
       skip.multiple <- SI.Prefixes$multiple[[skip]]
+      add_unit0(dimension, symbol, name, plural.name, "other", 1/skip.multiple, series)
     }
     
     for (i in prefix.range) {
