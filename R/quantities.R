@@ -1,13 +1,3 @@
-#' @export Quantity
-#' @export as.Quantity
-#' @export print.Quantity
-#' @export `+.Quantity`
-#' @export `-.Quantity`
-#' @export `*.Quantity`
-#' @export `/.Quantity`
-#' @export `^.Quantity`
-#' @export as.character.Quantity
-
 ## Physical Quantities
 
 is.Quantity <- function(q) {
@@ -21,6 +11,7 @@ as.Quantity <- function(value, unit = "") {
   UseMethod("as.Quantity")
 }
 
+##' @S3method as.Quantity Quantity
 as.Quantity.Quantity <- function(value, unit) {
 
   if (nargs() == 1L) return(value)
@@ -43,10 +34,17 @@ as.Quantity.numeric <- function(value, unit) {
   structure(value, class = c("Quantity", "numeric"), unit = unit)
 }
 
+##' @S3method print Quantity
 print.Quantity <- function(q, verbose = FALSE, ...) {
   cat("Units:", format(as.Unit(q), verbose), "\n")
   print(c(q), ...)
   invisible(q)
+}
+
+##' @S3method format Quantity
+format.Quantity <- function(q, digits = NULL, na.encode = FALSE,
+                            justify = justify) {
+  paste(NextMethod(q), format.Unit(as.Unit(q)))
 }
 
 as.character.Quantity <- function(q) {

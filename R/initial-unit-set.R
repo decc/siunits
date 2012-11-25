@@ -1,3 +1,79 @@
+## Definitions of dimensions
+
+Basis.Dimensions <- data.frame(
+  symbol = c("L", "M", "T", "I", "Th", "N", "J"),
+  name = c("length", "mass", "time", "electric current",
+    "thermodynamic temperature", "amount of substance", "luminous intensity"),
+  dimension = c("length", "mass", "time", "electric_current",
+    "temperature", "amount", "luminous_intensity"),
+  stringsAsFactors = FALSE) 
+
+DIMENSIONLESS = "ONE"
+
+Dimensions <- list(
+  ONE = list(
+    definition = NULL,
+    vector = c(0,0,0,0,0,0,0)),
+  length = list(
+    definition = NULL,
+    vector = c(1,0,0,0,0,0,0)),
+  mass = list(
+    definition = NULL,
+    vector = c(0,1,0,0,0,0,0)),
+  time = list(
+    definition = NULL,
+    vector = c(0,0,1,0,0,0,0)),
+  electric_current = list(
+    definition = NULL,
+    vector = c(0,0,0,1,0,0,0)),
+  temperature = list(
+    definition = NULL,
+    vector = c(0,0,0,0,1,0,0)),
+  amount = list(
+    definition = NULL,
+    vector = c(0,0,0,0,0,1,0)),
+  luminous_intensity = list(
+    definition = NULL,
+    vector = c(0,0,0,0,0,0,1)))
+
+## Units with type = "basis" are the default for those dimensions whose
+## definition is NULL. The order should be precisely the same as the order in
+## Basis.Dimensions
+
+Units <- data.frame(
+  symbol = c("m", "kg", "s", "A", "K", "mol", "cd"),
+  dimension = c("length", "mass", "time", "electric_current",
+    "temperature", "amount", "luminous_intensity"), 
+  name = c("metre", "kilogram", "second", "ampere", "kelvin", "mole",
+    "candela"),
+  plural.name = c("metres", "kilograms", "seconds", "amperes", "kelvins",
+    "moles", "candelas"),
+  type = "basis",
+  multiple = 1.0,
+  series = NA,
+  stringsAsFactors = FALSE
+  )
+
+SI.Prefixes <- data.frame(
+  name = c("yotta", "zetta", "exa", "peta", "tera", "giga", "mega", "kilo",
+    "hecto", "deca", "deci", "centi", "milli", "micro", "nano", "pico", "femto",
+    "atto", "zepto", "yocto"),
+  multiple = c(1e24, 1e21, 1e18, 1e15, 1e12, 1e9, 1e6, 1e3, 1e2, 10, 0.1, 1e-2,
+    1e-3, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18, 1e-21, 1e-24), 
+  prefix = c("Y", "Z", "E", "P", "T", "G", "M", "k", "h", "da", "d", "c", "m",
+    "µ", "n", "p", "f", "a", "z", "y"),
+  stringsAsFactors = FALSE) 
+
+
+SI.Defaults <- list(ONE = as.Unit(""),
+                    length = as.Unit("m"),
+                    mass = as.Unit("kg"),
+                    time = as.Unit("s"),
+                    electric_current = as.Unit("A"),
+                    temperature = as.Unit("K"),
+                    amount = as.Unit("mol"),
+                    luminous_intensity = as.Unit("cd"))
+
 
 ## The SI prefixed versions of the base units
 ## ==========================================

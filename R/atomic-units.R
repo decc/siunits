@@ -1,14 +1,11 @@
-## Functions for dealing with "atomic units"
-
-## indef.article : either "a" or "an" depending on the first letter of the word.
-indef.article <- function(str) {
-  if (substr(str, 1, 1) %in% c("a", "A", "e", "E", "i", "I", "o", "O", "u",
-                               "U")) {
-    "an"
-  } else {
-    "a" }
-}
-
+##' Functions for dealing with "atomic units"
+##'
+##' Atomic units are the units of defined dimensions. They are represented by a
+##' single symbol
+##' 
+##' 
+##'
+##' 
 
 ## atomic_unit := one of a list of named units (kg, J, N, Gt, mHz, ...)
 ##
@@ -41,6 +38,14 @@ dimension.atomic_unit <- function(au) {
   Units$dimension[match(au, Units$symbol)]
 }
 
+## The name of the unit
+name.unit <- function(au, singular = FALSE) {
+  if (singular) {
+    Units$name[match(au, Units$symbol)]
+  } else {
+    Units$plural.name[match(au, Units$symbol)]
+  }
+}
 
 ## Conversions
 
@@ -50,12 +55,29 @@ si_multiple.atomic_unit <- function(au) {
 }  
 
 
-## Making new units
-
-## Add units, including making up all the prefixed versions, calling add_unit0
-## for each individual unit (and to check for duplicates).
-## TODO: Vectorise
-
+##' Add a new atomic unit to the list of known atomic units
+##' 
+##' Creates a new atomic unit and adds it to the database. Units are units of a
+##' specific dimension, and this dimension must exist already (if not, it may be
+##' added by \code{\link{add_dimension}}).
+##'
+##' @param dimension The dimension for which this unit is defined. 
+##' @param symbol The symbol to use for this unit. Must not already exists and,
+##' if \code{gen.prefixes = TRUE}, none of the prefixed versions can be a name of
+##' an existing unit.
+##' @param name The English name of the unit.
+##' @param plural.name The plural of the name. May be omitted, in which case it
+##' will be derived from \code{name} by suffixing "s". 
+##' @param is.coherent Whether this unit is an "SI coherent" unit -- that is,
+##' the SI unit for \code{dimension}.
+##' @param multiple The ratio between the size of this unit and the size of the
+##' SI coherent unit. May be given as a \code{\link{Quantity}}, in which case
+##' the unit will have the size of the given \code{Quantity}. 
+##' @param gen.prefixes Whether to create SI-prefixed versions of this unit
+##' ("giga-", "mega-", "kilo-", ...).
+##' @param true.basis Internal.
+##' @param series Not used.
+##' @export
 add_unit <- function(dimension, symbol, name, plural.name = "",
                      is.coherent = FALSE,
                      multiple = 1.0,
@@ -74,8 +96,15 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
   if (plural.name == "") {
     plural.name <- paste(name, "s", sep = "")
   }
-  
-  type <- if (is.coherent) "coherent" else "other"
+
+  type <- ifelse(is.coherent, "coherent", "other")
+
+  ## Coherent units should be added to the list of default units for each
+  ## dimension, on the assumption that there is not more than one coherent unit
+  ## for each dimension.
+  if (is.coherent) {
+    SI.Defaults[[dimension]] <- structure(symbol, class = "Unit")
+  } 
   
   if (!gen.prefixes) {
     add_unit0(dimension, symbol, name, plural.name, type, multiple, series) 
@@ -118,8 +147,8 @@ add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, seri
 
   if (any(is.atomic_unit(symbol))) {
     type <- type.atomic_unit(symbol)
-    article <- indef.article(type) 
-    stop("unit '", symbol, "' is already defined (as", article, type.atomic_unit(symbol), "unit)")
+    stop("unit '", symbol, "' is already defined as a(n) ",
+         type.atomic_unit(symbol), " unit")
   }
   
   Units <<- rbind(Units,
@@ -132,34 +161,6 @@ add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, seri
                              series = series))
 }
 
-
-## Units in basis.units are the default for those dimensions whose
-## definition is NULL. The order should be precisely the same as the order in
-## Basis.Dimensions
-
-Units <- data.frame(
-  symbol = c("m", "kg", "s", "A", "K", "mol", "cd"),
-  dimension = c("length", "mass", "time", "electric_current",
-    "temperature", "amount", "luminous_intensity"), 
-  name = c("metre", "kilogram", "second", "ampere", "kelvin", "mole",
-    "candela"),
-  plural.name = c("metres", "kilograms", "seconds", "amperes", "kelvins",
-    "moles", "candelas"),
-  type = "basis",
-  multiple = 1.0,
-  series = NA,
-  stringsAsFactors = FALSE
-  )
-
-SI.Prefixes <- data.frame(
-  name = c("yotta", "zetta", "exa", "peta", "tera", "giga", "mega", "kilo",
-    "hecto", "deca", "deci", "centi", "milli", "micro", "nano", "pico", "femto",
-    "atto", "zepto", "yocto"),
-  multiple = c(1e24, 1e21, 1e18, 1e15, 1e12, 1e9, 1e6, 1e3, 1e2, 10, 0.1, 1e-2,
-    1e-3, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18, 1e-21, 1e-24), 
-  prefix = c("Y", "Z", "E", "P", "T", "G", "M", "k", "h", "da", "d", "c", "m",
-    "µ", "n", "p", "f", "a", "z", "y"),
-  stringsAsFactors = FALSE) 
 
 
 

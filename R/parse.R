@@ -1,8 +1,7 @@
-## Functions for reading strings
+## Functions for reading character representations of Units.
 
 ## Read a complex structure,
 ## eg, (kg m s^-2)_[force]
-## ( kg m s ^ -2 ) _ [ force ]
 
 ## Regular expression
 NAME <- "[[:alpha:]%]+"
