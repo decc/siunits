@@ -1,12 +1,8 @@
 ##' Convert units to a different dimensional basis.
 ##'
-##' Given a unit, convert to a unit with a given \code{\link{signature}}. The
+##' Given a Quantity, convert to units with a given \code{\link{signature}}. The
 ##' signature of a unit is an expression involving dimensions, combined with
 ##' products and powers.  
-##'
-##' @note Since conversion of units typically introduces a numerical factor, an
-##' argument of class \code{Unit} will be coerced to \code{Quantity} before conversion.
-##'
 ##'
 ##' @param x An object whose units are to be converted. Either a \code{Unit} or a \code{Quantity}.
 ##' @param to A dimensional expression (see below) to convert to. 
@@ -18,12 +14,56 @@
 ##'
 ##'
 ##'
-##'
 
-convert <- function(x, to = NA, with = NA) {
+## Some examples
+## convert(<1 N m>, to = "energy", with = list(energy = "ktoe"))
+## convert(<1 N m>, to = "energy") # Uses SI default list
+## convert(<1 N m>, with = list(energy = "ktoe")) # looks for units of
+##   signature "energy", recursively
+## convert(<1 (kg / s) (s / s^2)>, to = "mass time^-1", with = list(mass = "kg",
+##   time = "h") 
 
-
+##' @export
+convert <- function(x, to = NA, with = NULL) {
+  if (!is.na(to)) {
+    to <- as.Signature(to)
+  } else {
+    to <- as.Signature(x)
+  }
+  
+  if (!is.null(with)) {
+    with <- c(Map(as.Unit, with), SI.Defaults) # Prepend 'with' to 'SI.Defaults'
+  } else {
+    with <- SI.Defaults
+  }
+  
+  out.unit <- make_unit_from_signature(to, with)
+  as.Quantity(x, out.unit)
 }
+
+
+## Given unit = list(dimensions = unit, ...), go through 'sig' looking for dimensions,
+## and replace them with the respective definitions in 'units' to make a Unit.
+make_unit_from_signature <- function(sig, units) {
+  structure(apply_units_to_signature(sig, units), class = "Unit")
+}
+
+apply_units_to_signature <- function(sig, units) {
+  if (is.singleton(sig)) {
+    retrieve_dimension(sig, units)
+  } else if (is.derived(sig)) {
+    make_derived_unit(lapply(sig[-1], function(x) {apply_units_to_signature(x, units)}))
+  } else if (is.to_power(sig)) {
+    make_unit_to_power(apply_units_to_signature(sig[[2]]), u[[3]])
+  }
+}
+
+## Given an atomic dimension and a list of units, return the Unit
+retrieve_dimension <- function(dim, units) {
+  units[[match(dim, names(units))]]
+}
+
+  
 
 
 ## What is this unit as a multiple of SI basis units? 

@@ -3,7 +3,7 @@
 
 ##' @S3method print Unit
 print.Unit <- function(u, verbose = TRUE) {
-cat(format(u, verbose), "\n")
+  cat(format(u, verbose), "\n")
   invisible(u)
 }
 
@@ -30,7 +30,7 @@ format_unit0 <- function(u, verbose, parens) {
 }
 
 format_derived_unit <- function(u, verbose, parens) {
-  str <- paste(vapply(u[-1], format_unit0, character(1), verbose = verbose,
+  str <- paste0(vapply(u[-1], format_unit0, character(1), verbose = verbose,
                       parens = TRUE), collapse = " ")
   if (parens && (length(u) > 2)) {
     paste("(", str, ")", sep = "")

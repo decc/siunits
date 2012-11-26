@@ -39,7 +39,7 @@ is.empty <- function(toks) {
 }
 
 parse_error <- function(msg, toks) {
-  stop(msg, " with '", toks, "' left", .call = FALSE)
+  stop(msg, " with '", toks, "' left", call. = FALSE)
 }
 
 ## Higher-order functions for building parsers
@@ -85,7 +85,55 @@ parse_CLOSEDIM <- Literal("CLOSEDIM")
 parse_NUMBER <- Value("NUMBER")
 parse_NAME <- Value("NAME")
 
-## Constructors for parts of units
+
+## Testers for parts of Units
+
+## is.unit checks syntax only, any character string is accepted for dimensions
+## and atomic units  
+
+is.unit <- function(u) {
+  (identical(length(u), 0L)
+   || is.singleton(u) 
+   || (is.derived(u)
+       && all(vapply(u[-1], is.unit, logical(1)))) 
+   || (is.to_power(u)
+       && is.unit(u[[2]])
+       && is.numeric(u[[3]])
+       && !identical(u[[3]], 0))
+   || (is.dimensioned(u)
+       && is.unit(u[[2]])
+       && is.character(u[[3]])
+       && identical(length(u[[3]]), 1L)))
+}
+
+## Is u of the form "kg", or "m", etc
+is.singleton <- function(u) {
+  (identical(length(u), 1L) && is.character(u))
+}
+
+## Is u of the form list(_, ...)
+
+is.dimensioned <- function(u) {
+  (is.list(u)
+   && identical(length(u), 3L)
+   && u[[1]] == quote(`_`))
+ }
+  
+## Is u of the form list(*, ... )
+is.derived <- function(u) {
+  (is.list(u)
+   && length(u) > 1
+   && u[[1]] == quote(`*`))
+}
+
+## Is u of the form list(^, )
+is.to_power <- function(u) {
+  (is.list(u)
+   && identical(length(u), 3L)
+   && u[[1]] == quote(`^`))
+}
+
+## Constructors for parts of Units
 
 make_atomic_unit <- function(unit) {
   unit
@@ -125,16 +173,22 @@ parse_unit <- function(toks) {
   if (is.empty(second)) {
     parse_error("expecting <unit>", mult$toks)
   } else {
-    if (second$tree[[1]] == quote(`*`)) {
-      return(list(tree = make_derived_unit(c(first$tree, second$tree[-1])),
-                  toks = second$toks))
+    if (is.derived(first$tree)) {
+      first$tree <- first$tree[-1]
     } else {
-      return(list(tree = make_derived_unit(list(first$tree, second$tree)),
-                  toks = second$toks))
+      first$tree <- list(first$tree)
     }
+    if (is.derived(second$tree)) {
+      second$tree <- second$tree[-1]
+    } else {
+      second$tree <- list(second$tree)
+    }
+    
+    return(list(tree = make_derived_unit(c(first$tree, second$tree)),
+                  toks = second$toks))
   }
 }
-  
+
 
 parse_complete_unit <- function(toks) {
   if (is.empty(toks)) {
@@ -232,11 +286,12 @@ parse_subunit <- function(toks) {
   closesubunit <- parse_CLOSESUBUNIT(unit$toks)
   if (is.empty(closesubunit)) {
     parse_error("expecting ')'", dimension$toks)
+  } else {
+    return(list(tree = make_derived_unit(list(unit$tree)),
+                toks = closesubunit$toks))
   }
-
-  return(list(tree = make_derived_unit(list(unit$tree)),
-              toks = closesubunit$toks))
 }
+ 
   
   
 lexify_unit <- function(str) {

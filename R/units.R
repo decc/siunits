@@ -52,24 +52,6 @@ as.Unit.Quantity <- function(e) {
   attr(e, "unit")
 }
 
-## is.unit checks syntax only, any character string is accepted for dimensions
-## and atomic units  
-
-is.unit <- function(u) {
-  (identical(length(u), 0L)
-   || is.singleton(u) 
-   || (is.derived(u)
-       && all(vapply(u[-1], is.unit, logical(1)))) 
-   || (is.to_power(u)
-       && is.unit(u[[2]])
-       && is.numeric(u[[3]])
-       && !identical(u[[3]], 0))
-   || (is.dimensioned(u)
-       && is.unit(u[[2]])
-       && is.character(u[[3]])
-       && identical(length(u[[3]]), 1L)))
-}
-
 ## check_unit stops (with error) if its argument is not a unit, or if the atomic
 ## units or dimensions are not known. 
 
@@ -83,32 +65,6 @@ check_unit <- function(unit) {
   }
 }
              
-## Is u of the form "kg", or "m", etc
-is.singleton <- function(u) {
-  (identical(length(u), 1L) && is.character(u))
-}
-
-## Is u of the form list(_, ...)
-
-is.dimensioned <- function(u) {
-  (is.list(u)
-   && identical(length(u), 3L)
-   && u[[1]] == quote(`_`))
- }
-  
-## Is u of the form list(*, ... )
-is.derived <- function(u) {
-  (is.list(u)
-   && length(u) > 1
-   && u[[1]] == quote(`*`))
-}
-
-## Is u of the form list(^, )
-is.to_power <- function(u) {
-  (is.list(u)
-   && identical(length(u), 3L)
-   && u[[1]] == quote(`^`))
-}
 
 
 ## Check unit stops on error

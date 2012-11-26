@@ -97,7 +97,7 @@ Units can be added to the list of known units.
 ```r
 ## The unit 'tonnes of coal equivalent' is not defined in the siunits
 ## package.
-e2 <- as.Quantity(1, "tce")
+as.Quantity(1, "tce")
 ```
 
 ```
@@ -169,4 +169,50 @@ as.Quantity(CO2, "kt")
 ## [1] 2.152
 ```
 
+
+### A convenience function for conversions
+By default, `convert()` converts a quantity to SI units.
+
+```r
+convert(e1)
+```
+
+```
+## Units: W s 
+## [1] 3.6e+13
+```
+
+Note the difference between converting a 'derived unit', like "kW h", from an 'atomic unit', like "(kW h)_[energy]":
+
+```r
+convert(e2)
+```
+
+```
+## Units: J 
+## [1] 3.6e+13
+```
+
+Convert also accepts a list of defaults.
+
+```r
+defaults <- list(mass = "kt", energy = "ktoe")
+convert(e2, with = defaults)
+```
+
+```
+## Units: ktoe 
+## [1] 0.8598
+```
+
+Convert can be used to simplify units:
+
+```r
+convert(CO2, to = "mass", with = defaults)
+```
+
+```
+## Units: kt 
+## [1] 2.152
+```
 

@@ -17,6 +17,7 @@ Collate:
     'unit-ops.R'
     'unit-output.R'
     'quantities.R'
+    'quantity-ops.R'
     'conversion.R'
     'signatures.R'
     'initial-unit-set.R'

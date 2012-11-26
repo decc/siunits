@@ -96,16 +96,9 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
   if (plural.name == "") {
     plural.name <- paste(name, "s", sep = "")
   }
-
+  
   type <- ifelse(is.coherent, "coherent", "other")
 
-  ## Coherent units should be added to the list of default units for each
-  ## dimension, on the assumption that there is not more than one coherent unit
-  ## for each dimension.
-  if (is.coherent) {
-    SI.Defaults[[dimension]] <- structure(symbol, class = "Unit")
-  } 
-  
   if (!gen.prefixes) {
     add_unit0(dimension, symbol, name, plural.name, type, multiple, series) 
   } else {
@@ -138,13 +131,23 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
                 series)
     }
   }
+  
+  ## Finally, coherent units should be added to the list of default units for each
+  ## dimension, on the assumption that there is not more than one coherent unit
+  ## for each dimension.
+  if (is.coherent) {
+    if (is.na(true.basis)) {
+      SI.Defaults[[dimension]] <<- structure(symbol, class = "Unit")
+    } else {
+      SI.Defaults[[dimension]] <<- structure(true.basis, class = "Unit")
+    }    
+  }
 }
-
 
 ## Add a single unit
 
 add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, series) {
-
+  
   if (any(is.atomic_unit(symbol))) {
     type <- type.atomic_unit(symbol)
     stop("unit '", symbol, "' is already defined as a(n) ",
