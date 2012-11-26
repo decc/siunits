@@ -2,27 +2,22 @@
 ##'
 ##' Given a Quantity, convert to units with a given \code{\link{signature}}. The
 ##' signature of a unit is an expression involving dimensions, combined with
-##' products and powers.  
+##' products and powers. If no signature is given, the quantity is converted to
+##' the units in the default list \code{with}. If no default list is given, or a
+##' dimension is not found in it, the SI default units for each dimension are used.  
 ##'
 ##' @param x An object whose units are to be converted. Either a \code{Unit} or a \code{Quantity}.
 ##' @param to A dimensional expression (see below) to convert to. 
 ##' @param with A list of default units for specified dimensions. 
-##' @return A `Quantity`.
+##' @return An object of class Quantity.
+##' @examples
+##' \dontrun{
+##' qq <- as.Quantity(1, "N m")
+##' convert(as.Quantity"1 N m", to = "energy")
+##' convert("1 N m", to = "energy", with = list(energy = "ktoe"))
 ##'
-##'
-##'
-##'
-##'
-##'
-
-## Some examples
-## convert(<1 N m>, to = "energy", with = list(energy = "ktoe"))
-## convert(<1 N m>, to = "energy") # Uses SI default list
-## convert(<1 N m>, with = list(energy = "ktoe")) # looks for units of
-##   signature "energy", recursively
-## convert(<1 (kg / s) (s / s^2)>, to = "mass time^-1", with = list(mass = "kg",
-##   time = "h") 
-
+##' qe <- as.Quantity(1, "(N m)_[energy]") # Converts to SI units of energy
+##' }
 ##' @export
 convert <- function(x, to = NA, with = NULL) {
   if (!is.na(to)) {
@@ -49,12 +44,14 @@ make_unit_from_signature <- function(sig, units) {
 }
 
 apply_units_to_signature <- function(sig, units) {
-  if (is.singleton(sig)) {
+  if (is.empty(sig)) {
+    make_atomic_unit("")
+  } else if (is.singleton(sig)) {
     retrieve_dimension(sig, units)
   } else if (is.derived(sig)) {
     make_derived_unit(lapply(sig[-1], function(x) {apply_units_to_signature(x, units)}))
   } else if (is.to_power(sig)) {
-    make_unit_to_power(apply_units_to_signature(sig[[2]]), u[[3]])
+    make_unit_to_power(apply_units_to_signature((sig[2])[[1]], units), sig[[3]])
   }
 }
 
@@ -62,9 +59,6 @@ apply_units_to_signature <- function(sig, units) {
 retrieve_dimension <- function(dim, units) {
   units[[match(dim, names(units))]]
 }
-
-  
-
 
 ## What is this unit as a multiple of SI basis units? 
 

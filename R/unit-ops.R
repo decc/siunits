@@ -6,10 +6,11 @@ inverse_unit <- function(u) {
   power_unit(u, -1)
 }
 
+## The units of u^n
 power_unit <- function(u, n) {
-  if (is.single_atomic_unit(u)){
+  if (is.singleton(u)){
     structure(make_unit_to_power(u, n), class = "Unit")
-  } else if (is.unit_to_power(u)) {
+  } else if (is.to_power(u)) {
     structure(make_unit_to_power(u[[2]], n * u[[3]]), class = "Unit")
   } else {
     structure(make_unit_to_power(u, n), class = "Unit")
@@ -21,8 +22,7 @@ product_unit <- function(u1, u2) {
   structure(make_derived_unit(list(u1,u2)), class = "Unit")
 }
 
-## Return the 7-element dimension basis vector of this unit
-
+## Returns a vector of 7 elements, representing the SI basis of this unit
 unit_to_basis <- function(u) {
   if (identical(length(u), 0L)) {
     dimension_to_basis(DIMENSIONLESS)
@@ -37,6 +37,7 @@ unit_to_basis <- function(u) {
   }
 }
 
+## Checks arguments for equality of fundamental SI bases 
 is.compatible_unit <- function(u1, u2) {
   identical(unit_to_basis(as.Unit(u1)),
             unit_to_basis(as.Unit(u2)))

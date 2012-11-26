@@ -1,24 +1,33 @@
 ##' The Units class
+##' 
+##' Functions to create a Unit and to check membership of the Units class. A
+##' Unit is either an atomic unit (eg, "kg", or "s") or powers and products of
+##' units, possibly with associated dimensions for compound units.
 ##'
-##' @param u Object to be checked for membership in the Unit class
-##' @return Boolean.
+##' @name units
+##' @rdname units
+##' @aliases is.Unit as.Unit
+##' @param u Object to be checked for membership in the Unit class.
+##' @return In the case of \code{is.Unit}, a boolean; in the case of
+##' \code{as.Unit}, an object of class \code{Unit}.
+##' @seealso The package documentation for \code{\link{siunits}}.
 ##' @examples
-##' \dontrun{is.Unit(as.Unit("kg"))} 
+##' \dontrun{is.Unit(as.Unit("kg (m s^-2)_[acceleration]"))} 
 ##' @export
 ##' 
 is.Unit <- function(u) {
   inherits(u, "Unit")
 }
 
-##' Create a Unit 
-##'
-##' Functions to create Units from character, Unit, or Quantities.
-##'
-##' @param e A character vector of length one, or a Unit, or a Quantity. A
-##' character vector will be parsed as a string representation of a unit.
-##' @return A Unit. In the case of a Unit or Quantity argument, the Unit of the argument.
-##' @export as.Unit
- 
+##' @rdname units
+##' @usage as.Unit(e)
+##' @param e Object (character or Quantity) to be coerced to Unit. A Unit may
+##' also be given as \code{e}, in which case it is returned unchanged. 
+##' @export
+as.Unit <- function(e) {
+  UseMethod("as.Unit")
+}
+
 ## <unit> ::= ATOMIC UNIT 
 ##          | list(*, <unit>, ... ) 
 ##          | list(^, <unit>, NUMBER)
@@ -33,10 +42,6 @@ is.Unit <- function(u) {
 ## (_, <unit>, DIMENSION) : DIMENSION
 ##
 
-as.Unit <- function(e) {
-  UseMethod("as.Unit")
-}
-
 ##' @S3method as.Unit character
 as.Unit.character <- function(e) {
   structure(check_unit(parse_unit(lexify_unit(e))$tree), class = "Unit")
@@ -47,7 +52,7 @@ as.Unit.Unit <- function(e) {
   e
 }
 
-##' @S3method as.Unit Unit
+##' @S3method as.Unit Quantity
 as.Unit.Quantity <- function(e) {
   attr(e, "unit")
 }
@@ -64,8 +69,6 @@ check_unit <- function(unit) {
     check_unit0(unit)
   }
 }
-             
-
 
 ## Check unit stops on error
   

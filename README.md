@@ -5,6 +5,9 @@ Most physical quantities carry units. This package defines a new class, `Quantit
 
 Presently undocument and little commented.
 
+```r
+library(siunits)
+```
 
 
 Examples
@@ -68,7 +71,7 @@ name.unit("YJ")
 ```
 
 ```
-## [1] "yottajoules"
+## Error: could not find function "name.unit"
 ```
 
 Complex units are expressed in the usual notation. Multiplication is indicated with a space, powers by `^`. (The solidus (`/`) is not yet supported.) Parentheses group subnits. 
@@ -109,12 +112,18 @@ The definition of tce is 7 gigacalories, and the calorie is already part of the 
 ```r
 add_unit("energy", "tce", "tonne of coal equivalent", "tonnes of coal equivalent", 
     multiple = as.Quantity(7, "Gcal"), gen.prefixes = TRUE)
+```
+
+```
+## Error: cannot change value of locked binding for 'Units'
+```
+
+```r
 as.Quantity(1, "tce")
 ```
 
 ```
-## Units: tce 
-## [1] 1
+## Error: "tce" is not a known unit
 ```
 
 Not only `tce` but the full set of prefixed units will have been created.
@@ -124,7 +133,7 @@ name.unit("Mtce")
 ```
 
 ```
-## [1] "megatonnes of coal equivalent"
+## Error: could not find function "name.unit"
 ```
 
 

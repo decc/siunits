@@ -4,9 +4,8 @@ An experimental, extensible units package for R
 Most physical quantities carry units. This package defines a new class, `Quantity`, which allows numerical quantities in R to carry their physical units. Simple operations (`+`, `-`, `*`, `/`, and `^`) on quantities deal correctly with their units (and complain when the operation is not allowed by dimensional analysis). Conversion of units is supported. 
 
 Presently undocument and little commented.
-```{r, echo = FALSE, include = FALSE}
-library(devtools)
-load_all(reset = TRUE)
+```{r}
+library(siunits)
 ```
 
 Examples

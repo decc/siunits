@@ -1,60 +1,3 @@
-##' Functions for dealing with "atomic units"
-##'
-##' Atomic units are the units of defined dimensions. They are represented by a
-##' single symbol
-##' 
-##' 
-##'
-##' 
-
-## atomic_unit := one of a list of named units (kg, J, N, Gt, mHz, ...)
-##
-is.atomic_unit <- function(au) {
-  au %in% Units$symbol
-}
-
-is.coherent_atomic_unit <- function(au) {
-  (type.atomic_unit(au) == "coherent") | is.basis_atomic_unit(au)
-}
-
-is.basis_atomic_unit <- function(au) {
-  (type.atomic_unit(au) == "basis")
-}
-
-
-## Accessors
-## ---------
-
-## Type of atomic unit
-##
-type.atomic_unit <- function(au) {
-  Units$type[match(au, Units$symbol)]
-}
-
-## atomic_unit.dimension : atomic unit -> dimension
-## Extract the dimension of an atomic unit
-##
-dimension.atomic_unit <- function(au) {
-  Units$dimension[match(au, Units$symbol)]
-}
-
-## The name of the unit
-name.unit <- function(au, singular = FALSE) {
-  if (singular) {
-    Units$name[match(au, Units$symbol)]
-  } else {
-    Units$plural.name[match(au, Units$symbol)]
-  }
-}
-
-## Conversions
-
-## si_multiple.atomic_unit: unit -> number: the multiple these units are of SI basis units 
-si_multiple.atomic_unit <- function(au) {
-  Units$multiple[match(au, Units$symbol)]
-}  
-
-
 ##' Add a new atomic unit to the list of known atomic units
 ##' 
 ##' Creates a new atomic unit and adds it to the database. Units are units of a
@@ -71,7 +14,7 @@ si_multiple.atomic_unit <- function(au) {
 ##' @param is.coherent Whether this unit is an "SI coherent" unit -- that is,
 ##' the SI unit for \code{dimension}.
 ##' @param multiple The ratio between the size of this unit and the size of the
-##' SI coherent unit. May be given as a \code{\link{Quantity}}, in which case
+##' SI coherent unit. May be given as a \code{Quantity}, in which case
 ##' the unit will have the size of the given \code{Quantity}. 
 ##' @param gen.prefixes Whether to create SI-prefixed versions of this unit
 ##' ("giga-", "mega-", "kilo-", ...).
@@ -164,10 +107,53 @@ add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, seri
                              series = series))
 }
 
+## Testing for membership
+## ----------------------
 
+## atomic_unit := one of a list of named units (kg, J, N, Gt, mHz, ...)
+##
+is.atomic_unit <- function(au) {
+  au %in% Units$symbol
+}
 
+is.coherent_atomic_unit <- function(au) {
+  (type.atomic_unit(au) == "coherent") | is.basis_atomic_unit(au)
+}
 
+is.basis_atomic_unit <- function(au) {
+  (type.atomic_unit(au) == "basis")
+}
 
+## Accessors
+## ---------
 
+## Type of atomic unit
+##
+type.atomic_unit <- function(au) {
+  Units$type[match(au, Units$symbol)]
+}
 
+## atomic_unit.dimension : atomic unit -> dimension
+## Extract the dimension of an atomic unit
+##
+dimension.atomic_unit <- function(au) {
+  Units$dimension[match(au, Units$symbol)]
+}
+
+## The name of the unit
+name.unit <- function(au, singular = FALSE) {
+  if (singular) {
+    Units$name[match(au, Units$symbol)]
+  } else {
+    Units$plural.name[match(au, Units$symbol)]
+  }
+}
+
+## Conversions
+## -----------
+
+## si_multiple.atomic_unit: unit -> number: the multiple these units are of SI basis units 
+si_multiple.atomic_unit <- function(au) {
+  Units$multiple[match(au, Units$symbol)]
+}  
 

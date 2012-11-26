@@ -1,15 +1,31 @@
-## Signatures
-
-##' @export
+##' The Signatures class
+##'
+##' Functions to create Signatures and check membership in the class. A
+##' Signature is formed of products of powers of dimensions, possibly parenthesised. 
+##'
+##' @name signatures
+##' @rdname signatures
+##' @aliases as.Signature is.Signature
+##' @param s Object to be checked for membership in the Signature class.
+##' @return In the case of \code{is.Signature}, a boolean; in the case of
+##' \code{as.Signature}, an object of class \code{Signature}.
+##' @seealso The package documentation for \code{\link{siunits}}.
+##' @examples
+##' \dontrun{is.Signature(as.Signature("mass acceleration"))}
+##' @export is.Signature
 is.Signature <- function(s) {
   inherits(s, "Signature")
 }
 
+##' @rdname signatures
+##' @TODO Fix the method by which character strings are parsed (currently uses
+##' parse_unit).
+##' @usage as.Signature(e)
+##' @param e Object (character, Unit, or Quantity) to be coerced to Signature.
 ##' @export as.Signature
-as.Signature <- function(x) {
-  UseMethod("as.Signature", x)
+as.Signature <- function(e) {
+  UseMethod("as.Signature", e)
 }
-
 
 ## Given a unit, extract the named dimensions.
 ## signature ATOMIC UNIT -> dimension(ATOMIC UNIT)
@@ -18,25 +34,25 @@ as.Signature <- function(x) {
 ## signature (*, <unit> , ...) -> (*, signature(<unit>), ...)
 
 ##' @S3method as.Signature Unit
-as.Signature.Unit <- function(u) {
-  structure(as_signature(u), class = "Signature")
+as.Signature.Unit <- function(e) {
+  structure(as_signature(e), class = "Signature")
  }
 
 ##' @S3method as.Signature Quantity
-as.Signature.Quantity <- function(q) {
-  structure(as_signature(as.Unit(q)), class = "Signature")
+as.Signature.Quantity <- function(e) {
+  structure(as_signature(as.Unit(e)), class = "Signature")
 }
 
 ##' @S3method as.Signature Signature
-as.Signature.Signature <- function(s) {
-  s
+as.Signature.Signature <- function(e) {
+  e
 }
 
 ##' @S3method as.Signature character
 ## This is presently a cheat -- it uses parse_unit, so is not guaranteed to
 ## return a Signature!
-as.Signature.character <- function(s) {
-  sig <- parse_unit(lexify_unit(s))[[1]]
+as.Signature.character <- function(e) {
+  sig <- parse_unit(lexify_unit(e))[[1]]
   structure(sig, class = "Signature")
 }
 
@@ -75,7 +91,7 @@ format_signature0 <- function(s, parens = FALSE) {
 }
 
 ##' @S3method print Signature
-print.Signature <- function(s) {
-  cat(format(s), "\n")
-  invisible(s)
+print.Signature <- function(x, ...) {
+  cat(format(x, ...), "\n")
+  invisible(x)
 }

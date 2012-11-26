@@ -1,9 +1,10 @@
-## Functions for reading character representations of Units.
+## Functions for reading character representations of Units
+## ========================================================
 
 ## Read a complex structure,
 ## eg, (kg m s^-2)_[force]
 
-## Regular expression
+## Regular expressions for lexical analysis
 NAME <- "[[:alpha:]%]+"
 SPACE <- "[[:space:]]+"
 NUMBER <- "\\-?[[:digit:]]+"
@@ -285,7 +286,7 @@ parse_subunit <- function(toks) {
   
   closesubunit <- parse_CLOSESUBUNIT(unit$toks)
   if (is.empty(closesubunit)) {
-    parse_error("expecting ')'", dimension$toks)
+    parse_error("expecting ')'", opensubunit$toks)
   } else {
     return(list(tree = make_derived_unit(list(unit$tree)),
                 toks = closesubunit$toks))

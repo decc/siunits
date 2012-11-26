@@ -1,4 +1,8 @@
-## Definitions of dimensions
+## Initial set of units, dimensions, and defaults
+## ==============================================
+
+## Dimensions
+## ----------
 
 Basis.Dimensions <- data.frame(
   symbol = c("L", "M", "T", "I", "Th", "N", "J"),
@@ -36,6 +40,9 @@ Dimensions <- list(
     definition = NULL,
     vector = c(0,0,0,0,0,0,1)))
 
+## Units
+## -----
+
 ## Units with type = "basis" are the default for those dimensions whose
 ## definition is NULL. The order should be precisely the same as the order in
 ## Basis.Dimensions
@@ -65,6 +72,9 @@ SI.Prefixes <- data.frame(
   stringsAsFactors = FALSE) 
 
 
+## Defaults for conversion
+## -----------------------
+
 SI.Defaults <- list(ONE = as.Unit(""),
                     length = as.Unit("m"),
                     mass = as.Unit("kg"),
@@ -75,8 +85,8 @@ SI.Defaults <- list(ONE = as.Unit(""),
                     luminous_intensity = as.Unit("cd"))
 
 
-## The SI prefixed versions of the base units
-## ==========================================
+## SI-prefixed versions of the base units
+## --------------------------------------
 
 add_unit("mass", "g", "gram", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "kg")
 add_unit("length", "m", "metre", is.coherent = TRUE, gen.prefixes = TRUE, true.basis = "m")
@@ -89,19 +99,16 @@ add_unit("amount", "mol", "mole", is.coherent = TRUE, gen.prefixes = TRUE, true.
 add_unit("luminous_intensity", "cd", "candela", is.coherent = TRUE, gen.prefixes = TRUE, true.basis
          = "cd")
 
-
 ## Selected dimensions which don't have their own units in SI
-## ==========================================================
+## ----------------------------------------------------------
 
 add_dimension("velocity", c(length = 1, time = -1)) # m/s
 add_dimension("acceleration", c(velocity = 1, time = -1)) # (m/s)/s
 add_dimension("area", c(length = 2)) # m^2
 add_dimension("momentum", c(mass = 1, velocity = 1)) # kg (m/s)
 
-
-
 ## Dimensions with their own units
-## ===============================
+## -------------------------------
 
 add_dimension("frequency", c(time = -1))
 add_unit("frequency", "Hz", "hertz", "hertz",
@@ -135,9 +142,8 @@ add_unit("electric_charge", "C", "coulomb", is.coherent = TRUE, gen.prefixes =
 add_dimension("voltage", c(energy = 1, electric_charge = -1)) # V = J / C.
 add_unit("voltage", "V", "volt", is.coherent = TRUE, gen.prefixes = TRUE)
 
-
 ## Non-SI units
-## ============================
+## ------------
 
 add_unit("time", "h", "hour", multiple = 60 * 60)
 add_unit("mass", "t", "tonne", multiple = 1000, gen.prefixes = TRUE)
