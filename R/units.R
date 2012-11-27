@@ -90,7 +90,7 @@ check_atomic_unit <- function(unit) {
   if (is.atomic_unit(unit)) {
     unit
   } else {
-    stop('"', unit, '" is not a known unit')
+    stop('"', unit, '" is not a known unit', call. = FALSE)
   }
 }
 
@@ -100,12 +100,12 @@ check_derived_unit <- function(unit) {
 
 check_dimensioned_unit <- function(unit) {
   if (!is.dimension(unit[[3]])) {
-    stop ('"', unit[[3]], '" is not a known dimension')
+    stop ('"', unit[[3]], '" is not a known dimension', call. = FALSE)
   } else if (!identical(dimension_to_basis(unit[[3]]),
                         unit_to_basis(unit[[2]]))) {
-    stop ('"', unit[[3]], '" is not compatible with ', format_unit0(unit[[2]],
-                                                                    verbose = TRUE,
-                                                                    parens = TRUE))
+    stop ('"', unit[[3]], '" is not compatible with ',
+          format_unit0(unit[[2]], verbose = TRUE, parens = TRUE),
+          call. = FALSE)
   } 
   
   make_dimensioned_unit(check_unit0(unit[[2]]), unit[[3]])
@@ -113,7 +113,7 @@ check_dimensioned_unit <- function(unit) {
 
 check_unit_to_power <- function(unit) {
   if (identical(unit[[3]], 0)) {
-    stop("zero is not an allowed power")
+    stop("zero is not an allowed power", call. = FALSE)
   }
   make_unit_to_power(check_unit0(unit[[2]]), unit[[3]])
 }

@@ -28,7 +28,7 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
                      true.basis = NA,
                      series = NA) {
   if (!is.dimension(dimension)) {
-    stop(dimension, " is not a known dimension")
+    stop(dimension, " is not a known dimension", call. = FALSE)
   }
   
   if (is.Quantity(multiple)) {
@@ -96,7 +96,7 @@ add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, seri
   if (any(is.atomic_unit(symbol))) {
     type <- type.atomic_unit(symbol)
     stop("unit '", symbol, "' is already defined as a(n) ",
-         type.atomic_unit(symbol), " unit")
+         type.atomic_unit(symbol), " unit", call. = FALSE)
   }
 
   new.Units <- rbind(units.env$Units,
