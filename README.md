@@ -71,7 +71,7 @@ name.unit("YJ")
 ```
 
 ```
-## Error: could not find function "name.unit"
+## [1] "yottajoules"
 ```
 
 Complex units are expressed in the usual notation. Multiplication is indicated with a space, powers by `^`. (The solidus (`/`) is not yet supported.) Parentheses group subnits. 
@@ -112,18 +112,12 @@ The definition of tce is 7 gigacalories, and the calorie is already part of the 
 ```r
 add_unit("energy", "tce", "tonne of coal equivalent", "tonnes of coal equivalent", 
     multiple = as.Quantity(7, "Gcal"), gen.prefixes = TRUE)
-```
-
-```
-## Error: cannot change value of locked binding for 'Units'
-```
-
-```r
 as.Quantity(1, "tce")
 ```
 
 ```
-## Error: "tce" is not a known unit
+## Units: tce 
+## [1] 1
 ```
 
 Not only `tce` but the full set of prefixed units will have been created.
@@ -133,7 +127,7 @@ name.unit("Mtce")
 ```
 
 ```
-## Error: could not find function "name.unit"
+## [1] "megatonnes of coal equivalent"
 ```
 
 

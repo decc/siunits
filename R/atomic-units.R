@@ -79,11 +79,13 @@ add_unit <- function(dimension, symbol, name, plural.name = "",
   ## dimension, on the assumption that there is not more than one coherent unit
   ## for each dimension.
   if (is.coherent) {
+    defaults <- units.env$SI.Defaults
     if (is.na(true.basis)) {
-      SI.Defaults[[dimension]] <<- structure(symbol, class = "Unit")
+      defaults[[dimension]] <- structure(symbol, class = "Unit")
     } else {
-      SI.Defaults[[dimension]] <<- structure(true.basis, class = "Unit")
-    }    
+      defaults[[dimension]] <- structure(true.basis, class = "Unit")
+    }
+    assign("SI.Defaults", defaults, envir = units.env)
   }
 }
 
@@ -96,15 +98,16 @@ add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, seri
     stop("unit '", symbol, "' is already defined as a(n) ",
          type.atomic_unit(symbol), " unit")
   }
-  
-  Units <<- rbind(Units,
-                  data.frame(symbol = symbol,
-                             dimension = dimension,
-                             name = name,
-                             plural.name = plural.name,
-                             type = type,
-                             multiple = multiple,
-                             series = series))
+
+  new.Units <- rbind(units.env$Units,
+                     data.frame(symbol = symbol,
+                                dimension = dimension,
+                                name = name,
+                                plural.name = plural.name,
+                                type = type,
+                                multiple = multiple,
+                                series = series))
+  assign("Units", new.Units, envir = units.env)
 }
 
 ## Testing for membership
@@ -113,7 +116,7 @@ add_unit0 <- function(dimension, symbol, name, plural.name, type, multiple, seri
 ## atomic_unit := one of a list of named units (kg, J, N, Gt, mHz, ...)
 ##
 is.atomic_unit <- function(au) {
-  au %in% Units$symbol
+  au %in% units.env$Units$symbol
 }
 
 is.coherent_atomic_unit <- function(au) {
@@ -130,22 +133,30 @@ is.basis_atomic_unit <- function(au) {
 ## Type of atomic unit
 ##
 type.atomic_unit <- function(au) {
-  Units$type[match(au, Units$symbol)]
+  units.env$Units$type[match(au, units.env$Units$symbol)]
 }
 
 ## atomic_unit.dimension : atomic unit -> dimension
 ## Extract the dimension of an atomic unit
 ##
 dimension.atomic_unit <- function(au) {
-  Units$dimension[match(au, Units$symbol)]
+  units.env$Units$dimension[match(au, units.env$Units$symbol)]
 }
 
-## The name of the unit
+##' The English name of the unit
+##'
+##' Looks up a previously defined atomic unit and returns the name.
+##' 
+##' @param au The unit, as a character vector. For example, "kg".
+##' @param singular Boolean. Whether to return the singular or plural form of
+##' the name.
+##' @rdname nameunit
+##' @export
 name.unit <- function(au, singular = FALSE) {
   if (singular) {
-    Units$name[match(au, Units$symbol)]
+    units.env$Units$name[match(au, units.env$Units$symbol)]
   } else {
-    Units$plural.name[match(au, Units$symbol)]
+    units.env$Units$plural.name[match(au, units.env$Units$symbol)]
   }
 }
 
@@ -154,6 +165,6 @@ name.unit <- function(au, singular = FALSE) {
 
 ## si_multiple.atomic_unit: unit -> number: the multiple these units are of SI basis units 
 si_multiple.atomic_unit <- function(au) {
-  Units$multiple[match(au, Units$symbol)]
+  units.env$Units$multiple[match(au, units.env$Units$symbol)]
 }  
 

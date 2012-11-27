@@ -14,7 +14,7 @@ Basis.Dimensions <- data.frame(
 
 DIMENSIONLESS = "ONE"
 
-Dimensions <- list(
+assign("Dimensions", list(
   ONE = list(
     definition = NULL,
     vector = c(0,0,0,0,0,0,0)),
@@ -38,7 +38,7 @@ Dimensions <- list(
     vector = c(0,0,0,0,0,1,0)),
   luminous_intensity = list(
     definition = NULL,
-    vector = c(0,0,0,0,0,0,1)))
+    vector = c(0,0,0,0,0,0,1))), envir = units.env)
 
 ## Units
 ## -----
@@ -47,7 +47,7 @@ Dimensions <- list(
 ## definition is NULL. The order should be precisely the same as the order in
 ## Basis.Dimensions
 
-Units <- data.frame(
+assign("Units", data.frame(
   symbol = c("m", "kg", "s", "A", "K", "mol", "cd"),
   dimension = c("length", "mass", "time", "electric_current",
     "temperature", "amount", "luminous_intensity"), 
@@ -59,7 +59,7 @@ Units <- data.frame(
   multiple = 1.0,
   series = NA,
   stringsAsFactors = FALSE
-  )
+  ), envir = units.env)
 
 SI.Prefixes <- data.frame(
   name = c("yotta", "zetta", "exa", "peta", "tera", "giga", "mega", "kilo",
@@ -75,14 +75,14 @@ SI.Prefixes <- data.frame(
 ## Defaults for conversion
 ## -----------------------
 
-SI.Defaults <- list(ONE = as.Unit(""),
-                    length = as.Unit("m"),
-                    mass = as.Unit("kg"),
-                    time = as.Unit("s"),
-                    electric_current = as.Unit("A"),
-                    temperature = as.Unit("K"),
-                    amount = as.Unit("mol"),
-                    luminous_intensity = as.Unit("cd"))
+assign("SI.Defaults", list(ONE = as.Unit(""),
+                           length = as.Unit("m"),
+                           mass = as.Unit("kg"),
+                           time = as.Unit("s"),
+                           electric_current = as.Unit("A"),
+                           temperature = as.Unit("K"),
+                           amount = as.Unit("mol"),
+                           luminous_intensity = as.Unit("cd")), envir = units.env)
 
 
 ## SI-prefixed versions of the base units

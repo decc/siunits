@@ -27,9 +27,9 @@ convert <- function(x, to = NA, with = NULL) {
   }
   
   if (!is.null(with)) {
-    with <- c(Map(as.Unit, with), SI.Defaults) # Prepend 'with' to 'SI.Defaults'
+    with <- c(Map(as.Unit, with), units.env$SI.Defaults) # Prepend 'with' to 'SI.Defaults'
   } else {
-    with <- SI.Defaults
+    with <- units.env$SI.Defaults
   }
   
   out.unit <- make_unit_from_signature(to, with)

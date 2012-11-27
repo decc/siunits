@@ -12,17 +12,19 @@
 ##' \dontrun{add_dimension("velocity", c(length = 1, time = -1))}
 ##' @export
 add_dimension <- function(name, definition) {
-  if (name %in% names(Dimensions)) {
+  if (name %in% names(units.env$Dimensions)) {
     stop("dimension [", name, "] already defined")
   }
-  Dimensions[[name]] <<- list(definition = definition,
-                              vector = dimv_to_basis(definition))
+  dimensions <- units.env$Dimensions
+  dimensions[[name]] <- list(definition = definition,
+                             vector = dimv_to_basis(definition))
+  assign("Dimensions", dimensions, envir = units.env)
 }
 
 
 ## Return the 7 element vector representing this dimension in basis dimensions
 dimension_to_basis <- function(dim) {
-  Dimensions[[dim]]$vector
+  units.env$Dimensions[[dim]]$vector
 }
 
 ## Reduce a vector of the form (mass = 1, length = 2, ...) to basis dimensions
@@ -37,7 +39,7 @@ dimv_to_basis <- function(dimv) {
 
 
 is.dimension <- function(dimension) {
-  !is.null(Dimensions[[dimension]])
+  !is.null(units.env$Dimensions[[dimension]])
 }
 
 
