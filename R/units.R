@@ -57,6 +57,11 @@ as.Unit.Quantity <- function(e) {
   attr(e, "unit")
 }
 
+##' @S3method as.Unit numeric
+as.Unit.numeric <- function(e) {
+  "" # Dimensionless
+}
+
 ## check_unit stops (with error) if its argument is not a unit, or if the atomic
 ## units or dimensions are not known. 
 

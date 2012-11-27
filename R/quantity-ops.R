@@ -14,9 +14,12 @@
   if (!is.compatible_unit(as.Unit(e1), as.Unit(e2))) {
     stop("arguments to '+' must be unit compatible", call. = FALSE) 
   }
-  
-  as.Quantity(as.numeric(e1) + as.numeric(as.Quantity(e2, as.Unit(e1))),
-           as.Unit(e1))
+
+  ## Keep the units of the longest vector, or the first one (matches what `+`
+  ## does with names).
+  out.units <- ifelse((length(e2) > length(e1)), as.Unit(e2), as.Unit(e1))
+  make_quantity(unclass(as.Quantity(e1, out.units)) + unclass(as.Quantity(e2, out.units)),
+                out.units)
 }
 
 ##' @S3method - Quantity
@@ -27,8 +30,11 @@
     stop("arguments to '-' must be unit compatible", call. = FALSE) 
   }
   
-  as.Quantity(as.numeric(e1) - as.numeric(as.Quantity(e2, as.Unit(e1))),
-           as.Unit(e1))
+  ## Keep the units of the longest vector, or the first one (matches what `+`
+  ## does with names).
+  out.units <- ifelse((length(e2) > length(e1)), as.Unit(e2), as.Unit(e1))
+  make_quantity(unclass(as.Quantity(e1, out.units)) - unclass(as.Quantity(e2, out.units)),
+                out.units)
 }
 
 ##' @S3method * Quantity
@@ -39,20 +45,20 @@
   }
   
   if (!is.Quantity(e1)) {
-    return(as.Quantity(e1 * as.numeric(e2), as.Unit(e2)))
+    return(make_quantity(e1 * unclass(e2), as.Unit(e2)))
   } else {
-    return(as.Quantity(as.numeric(e1) * as.numeric(e2), product_unit(as.Unit(e1), as.Unit(e2))))
+    return(make_quantity(unclass(e1) * unclass(e2), product_unit(as.Unit(e1), as.Unit(e2))))
   }
 }
 
 ##' @S3method / Quantity
 `/.Quantity` <- function(e1, e2) {
   if (!is.Quantity(e2)) {
-    return(as.Quantity(as.numeric(e1) / e2, as.Unit(e1)))
+    return(make_quantity(unclass(e1) / e2, as.Unit(e1)))
   } else if (!is.Quantity(e1)) {
-    return(as.Quantity(e1 / as.numeric(e2), inverse_unit(as.Unit(e2))))
+    return(make_quantity(e1 / unclass(e2), inverse_unit(as.Unit(e2))))
   } else {
-    return(as.Quantity(as.numeric(e1) / as.numeric(e2),
+    return(as.Quantity(unclass(e1) / unclass(e2),
                        product_unit(as.Unit(e1),
                                     inverse_unit(as.Unit(e2)))))
   }
@@ -61,7 +67,7 @@
 ##' @S3method ^ Quantity
 `^.Quantity` <- function(e, num) {
 
-  as.Quantity(as.numeric(e)^num, power_unit(as.Unit(e), num))
+  as.Quantity(unclass(e)^num, power_unit(as.Unit(e), num))
 }
 
 ## Indexing and subsetting operations

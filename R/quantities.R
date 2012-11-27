@@ -30,28 +30,31 @@ as.Quantity <- function(value, unit = "") {
   UseMethod("as.Quantity")
 }
 
+## Internal function to create an object of class Quantity. `vaue` must be
+## numeric, `unit` must be a Unit. Attributes of value are preserved, including
+## `names` in particular.
+make_quantity <- function(value, unit) {
+  structure(value, class = c("Quantity", "numeric"), unit = unit)
+}
+
 ##' @S3method as.Quantity Quantity
 as.Quantity.Quantity <- function(value, unit) {
 
   if (nargs() == 1L) return(value)
-  
-  unit <- as.Unit(unit)
+
   old.unit <- as.Unit(value)
+  unit <- as.Unit(unit)
   if (!is.compatible_unit(unit, old.unit)) {
     stop("can't convert ", format(old.unit), " to ", format(unit), call. = FALSE)
   }
   
-  result <- as.numeric(value) * si_multiple.unit(old.unit) /
-    si_multiple.unit(unit)
-  
-  as.Quantity(result, unit)
+  value * si_multiple.unit(old.unit) / si_multiple.unit(unit)
 
 }
 
 ##' @S3method as.Quantity numeric
 as.Quantity.numeric <- function(value, unit) {
-  unit <- as.Unit(unit)
-  structure(value, class = c("Quantity", "numeric"), unit = unit)
+  make_quantity(value, as.Unit(unit))
 }
 
 ##' @S3method print Quantity
