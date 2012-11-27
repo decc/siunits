@@ -1,3 +1,10 @@
+sunits 0.1-1
+============
+
+* as.Quantity() and arithmetic operations on Quantities now preserve attributes
+  (eg, names).
+
+
 siunits 0.1
 ===========
 
