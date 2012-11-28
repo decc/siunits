@@ -17,7 +17,7 @@
 
   ## Keep the units of the longest vector, or the first one (matches what `+`
   ## does with names).
-  out.units <- ifelse((length(e2) > length(e1)), as.Unit(e2), as.Unit(e1))
+  out.units <- if (length(e2) > length(e1)) as.Unit(e2) else as.Unit(e1)
   make_quantity(unclass(as.Quantity(e1, out.units)) + unclass(as.Quantity(e2, out.units)),
                 out.units)
 }
@@ -32,7 +32,7 @@
   
   ## Keep the units of the longest vector, or the first one (matches what `+`
   ## does with names).
-  out.units <- ifelse((length(e2) > length(e1)), as.Unit(e2), as.Unit(e1))
+  out.units <- if (length(e2) > length(e1)) as.Unit(e2) else as.Unit(e1)
   make_quantity(unclass(as.Quantity(e1, out.units)) - unclass(as.Quantity(e2, out.units)),
                 out.units)
 }
