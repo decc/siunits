@@ -1,7 +1,12 @@
-sunits 0.1-1
-============
+siunits 0.1-2
+=============
 
-* as.Quantity() and arithmetic operations on Quantities now preserve attributes
+* Bugfix: `as.Quantity(q, unit)` did not set the new units correctly.
+
+siunits 0.1-1
+=============
+
+* `as.Quantity()` and arithmetic operations on Quantities now preserve attributes
   (eg, names).
 
 

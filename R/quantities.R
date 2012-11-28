@@ -48,8 +48,8 @@ as.Quantity.Quantity <- function(value, unit) {
     stop("can't convert ", format(old.unit), " to ", format(unit), call. = FALSE)
   }
   
-  value * si_multiple.unit(old.unit) / si_multiple.unit(unit)
-
+  make_quantity(unclass(value) * si_multiple.unit(old.unit) /
+                si_multiple.unit(unit), unit)
 }
 
 ##' @S3method as.Quantity numeric
