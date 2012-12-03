@@ -58,7 +58,7 @@
   } else if (!is.Quantity(e1)) {
     return(make_quantity(e1 / unclass(e2), inverse_unit(as.Unit(e2))))
   } else {
-    return(as.Quantity(unclass(e1) / unclass(e2),
+    return(make_quantity(unclass(e1) / unclass(e2),
                        product_unit(as.Unit(e1),
                                     inverse_unit(as.Unit(e2)))))
   }
@@ -66,8 +66,29 @@
 
 ##' @S3method ^ Quantity
 `^.Quantity` <- function(e, num) {
+  make_quantity(unclass(e)^num, power_unit(as.Unit(e), num))
+}
 
-  as.Quantity(unclass(e)^num, power_unit(as.Unit(e), num))
+## Summary methods
+## ---------------
+
+##' @S3method Summary Quantity
+Summary.Quantity <- function(..., na.rm) {
+  ok <- switch(.Generic, max = , min = , range = , sum = TRUE, FALSE)
+  if (!ok)
+    stop(.Generic, " not defined for Quantity objects", call. = FALSE)
+  args <- list(...)
+  ## Argument list must all be of compatible units; will be converted to the
+  ## units of the first argument
+  unit <- as.Unit(args[[1]])
+  args[[1]] <- unclass(args[[1]])
+  args[-1] <- lapply(args[-1],
+                     function(arg) {
+                       if (!is.compatible_unit(unit, as.Unit(arg))) 
+                         stop("Arguments to ", .Generic, " must have compatible units")
+                       unlcass(as.Quantity(arg, unit))
+                     })
+  as.Quantity(NextMethod(.Generic), unit)
 }
 
 ## Indexing and subsetting operations
@@ -118,3 +139,5 @@
   x[[...]] <- as.numeric(as.Quantity(value, u))
   structure(x, class = cl, unit = u) 
 }
+
+  

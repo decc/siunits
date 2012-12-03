@@ -1,3 +1,8 @@
+siunits 0.2
+===========
+
+* Summary methods (sum, max, min, range) now work with Quantities.  
+
 siunits 0.1-3
 =============
 
