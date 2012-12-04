@@ -88,7 +88,7 @@ Summary.Quantity <- function(..., na.rm) {
                          stop("Arguments to ", .Generic, " must have compatible units")
                        unlcass(as.Quantity(arg, unit))
                      })
-  as.Quantity(NextMethod(.Generic), unit)
+  make_quantity(NextMethod(.Generic), unit)
 }
 
 ## Indexing and subsetting operations
@@ -140,4 +140,19 @@ Summary.Quantity <- function(..., na.rm) {
   structure(x, class = cl, unit = u) 
 }
 
-  
+## Vector concatenation
+## --------------------
+
+##' @S3method c Quantity
+c.Quantity <- function(..., recursive = FALSE) {
+  unit = as.Unit(list(...)[[1]])  
+  make_quantity(
+    c(unlist(lapply(list(...),
+                    function(arg) {
+                      if (!is.compatible_unit(unit, as.Unit(arg))) 
+                        stop("Arguments to ", .Generic,
+                             " must have compatible units", call. = FALSE)
+                      unclass(as.Quantity(arg, unit))}))),
+    unit)
+}
+

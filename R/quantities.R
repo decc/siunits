@@ -59,8 +59,10 @@ as.Quantity.numeric <- function(value, unit) {
 
 ##' @S3method print Quantity
 print.Quantity <- function(x, verbose = FALSE, ...) {
-  cat("Units:", format(as.Unit(x), verbose), "\n")
-  print(c(x), ...)
+  unit <- as.Unit(x)
+  attr(x, "unit") <- NULL
+  print(unclass(x), ...)
+  cat("Units:", format(unit, verbose), "\n")
   invisible(x)
 }
 
