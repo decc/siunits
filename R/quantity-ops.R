@@ -69,8 +69,8 @@
   make_quantity(unclass(e)^num, power_unit(as.Unit(e), num))
 }
 
-## Summary methods
-## ---------------
+## Summary Group generics 
+## ----------------------
 
 ##' @S3method Summary Quantity
 Summary.Quantity <- function(..., na.rm) {
@@ -89,6 +89,14 @@ Summary.Quantity <- function(..., na.rm) {
                        unlcass(as.Quantity(arg, unit))
                      })
   make_quantity(NextMethod(.Generic), unit)
+}
+
+## Other summary functions
+## -----------------------
+
+##' @S3method mean Quantity
+mean.Quantity <- function(x, ...) {
+  make_quantity(mean(unclass(x)), as.Unit(x))
 }
 
 ## Indexing and subsetting operations

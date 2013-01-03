@@ -3,6 +3,8 @@ siunits 0.2
 
 * Summary methods (sum, max, min, range) now work with Quantities.  
 
+* Added mean.Quantity so that, eg, `summary(v)` works for Quantity vectors.
+
 siunits 0.1-3
 =============
 
